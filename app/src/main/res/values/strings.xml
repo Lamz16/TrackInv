@@ -9,4 +9,9 @@
     <string name="menu_home">Home</string>
     <string name="menu_inventory">Inventory</string>
     <string name="menu_profile">Account</string>
+    <string name="stok">stok</string>
+    <string name="category">category</string>
+    <string name="id">id</string>
+    <string name="pieces">%1$d pcs</string>
+    <string name="idnumber">%1$d</string>
 </resources>
