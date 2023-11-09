@@ -1,4 +1,8 @@
 package com.lamz.trackinv.ui.screen.home
 
-class HomeViewModel {
+import androidx.lifecycle.ViewModel
+
+
+class HomeViewModel(): ViewModel() {
+
 }
