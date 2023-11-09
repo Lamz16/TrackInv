@@ -1,5 +1,6 @@
 package com.lamz.trackinv.ui.screen.login
 
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -9,3 +10,12 @@ fun LoginScreen(
 ) {
 
 }
+import androidx.compose.foundation.layout.Column
+
+fun LoginScreen(){
+
+}
+
+fun LoginContent(){
+}
+

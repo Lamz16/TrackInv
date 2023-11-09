@@ -1,8 +1,13 @@
 package com.lamz.trackinv.ui.screen.register
 
-import androidx.lifecycle.ViewModel
+
 
 class RegisterViewModel() : ViewModel(){
 
     
+=======
+import com.lamz.trackinv.data.TrackRepository
+
+class RegisterViewModel(private val repository: TrackRepository): ViewModel()  {
+
 }

@@ -14,4 +14,5 @@
     <string name="id">id</string>
     <string name="pieces">%1$d pcs</string>
     <string name="idnumber">%1$d</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
 </resources>

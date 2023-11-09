@@ -1,4 +1,4 @@
-package com.lamz.trackinv
+package com.lamz.trackinv.ui.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.lamz.trackinv.ui.theme.TrackInvTheme
+import com.lamz.trackinv.TrackInvApp
 
-class MainActivity : ComponentActivity() {
+class WelcomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TrackInvTheme {
+            com.lamz.trackinv.ui.theme.TrackInvTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
