@@ -17,8 +17,10 @@ import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.component.TextItem
 
 @Composable
-fun HomeScreen(){
-HomeContent()
+fun HomeScreen(
+    modifier: Modifier = Modifier
+){
+    HomeContent()
 }
 
 
@@ -47,7 +49,6 @@ fun HomeContent(){
 
         TextItem(desc = stringResource(id = R.string.last_update))
 
-        CardLongItem()
     }
 
 
