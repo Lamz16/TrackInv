@@ -1,31 +1,26 @@
 package com.lamz.trackinv.ui.screen.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lamz.trackinv.R
+import com.lamz.trackinv.ui.component.CardItem1
+import com.lamz.trackinv.ui.component.CardItem2
+import com.lamz.trackinv.ui.component.CardLongItem
+import com.lamz.trackinv.ui.component.TextItem
 
 @Composable
 fun HomeScreen(){
-
+HomeContent()
 }
+
 
 
 @Composable
@@ -34,93 +29,25 @@ fun HomeContent(){
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(top = 48.dp)
+                .padding(top = 48.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
-            Card(modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.black40)
-                )
-
-            ){
-
-            }
-
-            Card(modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.black40)
-                )
-
-            ){
-
-            }
-
-            Card(modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.black40)
-                )
-
-            ){
-
-            }
+            CardItem1(R.drawable.ic_stok_tersedia, stringResource(id = R.string.tersedia))
+            CardItem1(R.drawable.ic_menipis, stringResource(id = R.string.menipis))
+            CardItem1(R.drawable.ic_stok_habis, stringResource(id = R.string.habis))
         }
 
-        Row (Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center){
-            Card(modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.black40)
-                )
-
-            ){
-
-            }
-
-            Card(modifier = Modifier
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.black40)
-                )
-
-            ){
-
-            }
-
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ){
+            CardItem2(R.drawable.ic_stok_masuk, stringResource(id = R.string.stok_masuk))
+            CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar))
         }
 
-        Text(text = stringResource(id = R.string.last_update),
-            modifier = Modifier
-                .padding( start = 24.dp,
-                    top = 60.dp)
-        )
+        TextItem(desc = stringResource(id = R.string.last_update))
 
-        Column {
-            Card(modifier = Modifier.fillMaxWidth()
-                .padding(16.dp)
-                .size(100.dp)
-                .clip(RoundedCornerShape(10.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorResource(id = R.color.lavender)
-                )
-
-            ){
-
-            }
-        }
-
+        CardLongItem()
     }
 
 

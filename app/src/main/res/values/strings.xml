@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">TrackInv</string>
     <string name="last_update">Last Update</string>
+    <string name="tersedia">Stok tersedia</string>
+    <string name="menipis">Stok Menipis</string>
+    <string name="habis">Stok Habis</string>
+    <string name="stok_masuk">Stok Masuk</string>
+    <string name="stok_keluar">Stok Keluar</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_inventory">Inventory</string>
+    <string name="menu_profile">Account</string>
 </resources>
