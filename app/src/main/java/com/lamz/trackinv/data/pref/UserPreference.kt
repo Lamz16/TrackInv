@@ -1,6 +1,7 @@
 package com.lamz.trackinv.data.pref
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -17,7 +18,9 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
     suspend fun saveSession(user: UserModel) {
         dataStore.edit { preferences ->
             preferences[EMAIL_KEY] = user.email
+            Log.d("This Email", "LoginContent: ${user.email}")
             preferences[PASSWORD_KEY] = user.password
+            Log.d("This Password", "LoginContent: ${user.password}")
             preferences[IS_LOGIN_KEY] = true
         }
     }

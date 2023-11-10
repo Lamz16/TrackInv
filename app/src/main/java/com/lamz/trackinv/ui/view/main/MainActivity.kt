@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import com.lamz.trackinv.TrackInvApp
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.ui.theme.TrackInvTheme
-import com.lamz.trackinv.ui.view.WelcomeActivity
+import com.lamz.trackinv.ui.view.welcome.WelcomeActivity
 
 class MainActivity : ComponentActivity() {
 

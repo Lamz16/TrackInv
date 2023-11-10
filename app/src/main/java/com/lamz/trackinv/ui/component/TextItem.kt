@@ -1,21 +1,23 @@
 package com.lamz.trackinv.ui.component
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 
 
 @Composable
 fun TextItem(
     desc: String,
+    fontWeight: FontWeight? = null,
+    fontSize : TextUnit = TextUnit.Unspecified,
     modifier: Modifier = Modifier
 ) {
 
     Text(
-        text = desc,
-        modifier = Modifier
-            .padding(start = 24.dp, top = 60.dp)
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        text = desc
     )
 }

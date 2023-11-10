@@ -47,7 +47,7 @@ fun HomeContent(){
 
         TextItem(desc = stringResource(id = R.string.last_update))
 
-        CardLongItem()
+        CardLongItem(namaItem = "Gula", pieces = 200, category = "Sembako", id = 39210237L)
     }
 
 

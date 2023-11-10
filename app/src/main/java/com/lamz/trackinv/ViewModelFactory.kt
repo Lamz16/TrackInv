@@ -6,14 +6,22 @@ import androidx.lifecycle.ViewModelProvider
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.ui.screen.home.HomeViewModel
+import com.lamz.trackinv.ui.screen.login.LoginViewModel
+import com.lamz.trackinv.ui.view.main.MainViewModel
 
 class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
+            modelClass.isAssignableFrom(MainViewModel::class.java) -> {
+                MainViewModel(repository) as T
+            }
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
+                LoginViewModel(repository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
