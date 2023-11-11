@@ -3,6 +3,7 @@ package com.lamz.trackinv.ui.screen.login
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -64,9 +67,15 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    val scrollStateHorizontal = rememberScrollState()
+    val scrollStateVertical = rememberScrollState()
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter,
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .horizontalScroll(scrollStateHorizontal)
+            .verticalScroll(scrollStateVertical),
+
     ) {
         LoginContent(navController = navController)
     }
