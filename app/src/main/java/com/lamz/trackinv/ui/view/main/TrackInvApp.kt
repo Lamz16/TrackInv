@@ -1,4 +1,4 @@
-package com.lamz.trackinv
+package com.lamz.trackinv.ui.view.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.lamz.trackinv.R
 import com.lamz.trackinv.ui.navigation.NavigationItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.screen.account.AccountScreen
