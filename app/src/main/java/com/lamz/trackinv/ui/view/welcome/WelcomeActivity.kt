@@ -20,9 +20,10 @@ class WelcomeActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LoginScreen()
+                    AppNavigation()
                 }
             }
         }
     }
 }
+

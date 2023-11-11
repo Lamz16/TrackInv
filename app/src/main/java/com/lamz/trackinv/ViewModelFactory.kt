@@ -7,6 +7,7 @@ import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.ui.screen.home.HomeViewModel
 import com.lamz.trackinv.ui.screen.login.LoginViewModel
+import com.lamz.trackinv.ui.screen.register.RegisterViewModel
 import com.lamz.trackinv.ui.view.main.MainViewModel
 
 class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvider.NewInstanceFactory() {
@@ -22,6 +23,9 @@ class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvi
             }
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
                 LoginViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
+                RegisterViewModel(repository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }

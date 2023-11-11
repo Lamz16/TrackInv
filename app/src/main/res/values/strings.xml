@@ -12,6 +12,9 @@
     <string name="pieces">%1$d pcs</string>
     <string name="idnumber">%1$d</string>
     <string name="login">Login</string>
+    <string name="to_register">No account?\u0020</string>
+    <string name="or">Or\u0020</string>
+    <string name="register">Register</string>
     <string name="menu_home">Home</string>
     <string name="menu_inventory">Inventory</string>
     <string name="menu_profile">Account</string>
