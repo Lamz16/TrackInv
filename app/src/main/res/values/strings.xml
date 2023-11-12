@@ -10,7 +10,7 @@
     <string name="category">category</string>
     <string name="id">id</string>
     <string name="pieces">%1$d pcs</string>
-    <string name="idnumber">%1$d</string>
+    <string name="id_inventory">%s</string>
     <string name="login">Login</string>
     <string name="to_register">No account?\u0020</string>
     <string name="or">Or\u0020</string>
@@ -19,4 +19,5 @@
     <string name="menu_inventory">Inventory</string>
     <string name="menu_profile">Account</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="daftar_barang">Daftar Barang</string>
 </resources>

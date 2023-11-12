@@ -8,6 +8,8 @@ import com.lamz.trackinv.data.TrackRepository
 
 class RegisterViewModel(private val repository: TrackRepository): ViewModel() {
     var name by mutableStateOf("")
+    var email by mutableStateOf("")
+    var alamat by mutableStateOf("")
     var phone by mutableStateOf("")
     var password by mutableStateOf("")
     var confirmPassword by mutableStateOf("")

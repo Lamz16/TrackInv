@@ -18,6 +18,7 @@ fun TextItem(
     Text(
         fontSize = fontSize,
         fontWeight = fontWeight,
-        text = desc
+        text = desc,
+        modifier = modifier
     )
 }

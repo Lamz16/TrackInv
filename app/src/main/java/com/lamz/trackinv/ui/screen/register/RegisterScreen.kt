@@ -146,6 +146,29 @@ fun RegisterContent(
             )
 
         OutlinedTextField(
+            value = viewModel.email,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = containerColor,
+                unfocusedContainerColor = containerColor,
+                disabledContainerColor = containerColor,
+            ),
+            label = { Text(text = "Email") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            singleLine = true,
+            onValueChange = { newInput ->
+                viewModel.email = newInput
+            },
+            shape = RoundedCornerShape(size = 20.dp),
+            modifier = Modifier
+                .padding(bottom = 24.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                },
+
+            )
+
+        OutlinedTextField(
             value = viewModel.phone,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
@@ -267,6 +290,29 @@ fun RegisterContent(
             }
         )
 
+        OutlinedTextField(
+            value = viewModel.alamat,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = containerColor,
+                unfocusedContainerColor = containerColor,
+                disabledContainerColor = containerColor,
+            ),
+            label = { Text(text = "Alamat") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            singleLine = true,
+            onValueChange = { newInput ->
+                viewModel.alamat = newInput
+            },
+            shape = RoundedCornerShape(size = 20.dp),
+            modifier = Modifier
+                .padding(bottom = 24.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                },
+
+            )
+
         if (isNotMatching.value) {
             Text(text = "Password tidak sama!!", color = Color.Red)
         }
@@ -327,6 +373,7 @@ fun RegisterContent(
                 }
             )
         }
+
 
         Row {
             Text(text = stringResource(id = R.string.or))

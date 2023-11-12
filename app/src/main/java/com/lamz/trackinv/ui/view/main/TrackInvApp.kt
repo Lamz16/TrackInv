@@ -97,7 +97,7 @@ fun TrackInvApp(
 
     Scaffold(
         bottomBar = {
-            if (currentRoute != Screen.DetailReward.route) {
+            if (currentRoute != Screen.DetailInventory.route) {
                 BottomBar(navController)
             }
         },

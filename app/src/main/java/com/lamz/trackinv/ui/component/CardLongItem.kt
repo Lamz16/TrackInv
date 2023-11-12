@@ -32,7 +32,7 @@ fun CardLongItem(
     namaItem: String,
     pieces: Int,
     category: String,
-    id: Long,
+    id: String,
     modifier: Modifier = Modifier,
 
 
@@ -53,7 +53,7 @@ fun CardLongItem(
             modifier = modifier
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_home),
+                painter = painterResource(id = R.drawable.ic_list_barang),
                 contentDescription = null,
                 modifier = modifier
                     .padding(start = 10.dp, end = 10.dp, bottom = 5.dp, top = 5.dp)
@@ -103,7 +103,7 @@ fun CardLongItem(
                 text = category
             )
             Text(
-                text = stringResource(id = R.string.idnumber, id)
+                text = stringResource(id = R.string.id_inventory, id)
             )
         }
     }
@@ -114,5 +114,5 @@ fun CardLongItem(
 @Preview(showBackground = true)
 @Composable
 fun CardLongItemPreview(){
-    CardLongItem("IndoFood",10,"accesoris",0)
+    CardLongItem("IndoFood",10,"accesoris","0")
 }

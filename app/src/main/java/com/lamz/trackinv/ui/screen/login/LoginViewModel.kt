@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: TrackRepository): ViewModel() {
 
-    var username by mutableStateOf("")
+    var email by mutableStateOf("")
     var password by mutableStateOf("")
 
     fun saveSession(user: UserModel) {

@@ -122,17 +122,17 @@ fun LoginContent(
 
         val containerColor = colorResource(id = R.color.lavender)
         OutlinedTextField(
-            value = viewModel.username,
+            value = viewModel.email,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
                 disabledContainerColor = containerColor,
             ),
-            label = { Text(text = "Username") },
+            label = { Text(text = "Email") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.username = newInput
+                viewModel.email = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -198,7 +198,7 @@ fun LoginContent(
             onClick = {
                 // Set showDialog to true when the button is clicked
                 showDialog = true
-                viewModel.saveSession(UserModel(viewModel.username, viewModel.password, true))
+                viewModel.saveSession(UserModel(viewModel.email, viewModel.password, true))
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
