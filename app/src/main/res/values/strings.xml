@@ -20,4 +20,6 @@
     <string name="menu_profile">Account</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="daftar_barang">Daftar Barang</string>
+    <string name="tambah_barang">Tambah Barang</string>
+    <string name="title_activity_add">AddActivity</string>
 </resources>
