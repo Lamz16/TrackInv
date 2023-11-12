@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.ui.screen.add.AddViewModel
 import com.lamz.trackinv.ui.screen.home.HomeViewModel
 import com.lamz.trackinv.ui.screen.login.LoginViewModel
 import com.lamz.trackinv.ui.screen.register.RegisterViewModel
@@ -26,6 +27,9 @@ class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvi
             }
             modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
                 RegisterViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(AddViewModel::class.java) -> {
+                AddViewModel(repository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
