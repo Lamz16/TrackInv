@@ -2,6 +2,7 @@ package com.lamz.trackinv.ui.screen.register
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,6 +62,7 @@ import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
@@ -101,6 +106,30 @@ fun RegisterContent(
         }
     }
 
+    val isLoading by viewModel.isLoading.observeAsState(initial = false)
+
+    val uploadState by viewModel.upload.observeAsState()
+
+    // Menanggapi perubahan nilai upload
+    when (val uiState = uploadState) {
+        is UiState.Loading -> {
+
+        }
+        is UiState.Success -> {
+
+            showDialog = true
+
+        }
+        is UiState.Error -> {
+
+            showDialog = false
+
+        }
+
+        else -> {}
+    }
+
+
     LaunchedEffect(true) {
         if (wasFocused) {
             focusRequester.requestFocus()
@@ -123,7 +152,7 @@ fun RegisterContent(
 
 
         OutlinedTextField(
-            value = viewModel.name,
+            value = viewModel.namaToko,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -133,7 +162,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.name = newInput
+                viewModel.namaToko = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -169,17 +198,17 @@ fun RegisterContent(
             )
 
         OutlinedTextField(
-            value = viewModel.phone,
+            value = viewModel.username,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
                 disabledContainerColor = containerColor,
             ),
-            label = { Text(text = "No Hp") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            label = { Text(text = "Username") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.phone = newInput
+                viewModel.username = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -319,15 +348,34 @@ fun RegisterContent(
 
         ElevatedButton(
             onClick = {
+                if (viewModel.password.length < 8) {
+              Toast.makeText(context,"Password kurang dari 8", Toast.LENGTH_SHORT).show()
+                    return@ElevatedButton
+                }
+
                 // Set showDialog to true when the button is clicked
-                showDialog = true
+                viewModel.uploadData(
+                    viewModel.email,
+                    viewModel.password,
+                    viewModel.username,
+                    viewModel.namaToko,
+                    viewModel.alamat
+                )
 
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
+            enabled = !isLoading,
         ) {
-            Text("REGISTER")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White
+                )
+            } else {
+                Text("REGISTER")
+            }
         }
 
         if (showDialog) {

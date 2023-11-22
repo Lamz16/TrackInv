@@ -18,8 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.ui.component.CardItem1
 import com.lamz.trackinv.ui.component.CardItem2
 import com.lamz.trackinv.ui.component.CardLongItem
@@ -56,15 +59,20 @@ fun HomeContent(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
 ) {
+
+    val sessionData by viewModel.getSession().observeAsState()
+
     var showDialog by remember { mutableStateOf(false) }
 
     TopAppBar(
         title = {
-            Text(
-                "Toko Wijaya",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
-            )
+            sessionData?.let {
+                Text(
+                    it.name,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 32.sp,
+                )
+            }
         },
         actions = {
             IconButton(onClick = {

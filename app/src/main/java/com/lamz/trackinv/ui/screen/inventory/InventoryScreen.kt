@@ -36,39 +36,12 @@ import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.screen.inventory.model.InventoryData
 import com.lamz.trackinv.ui.view.add.AddActivity
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun InventoryScreen(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current,
+
     ) {
-
-    var showDialog by remember { mutableStateOf(false) }
-
-    TopAppBar(
-        title = { Text(stringResource(id = R.string.daftar_barang),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,) },
-        actions = {
-            IconButton(onClick = {
-                showDialog = false
-                val intent = Intent(context,AddActivity::class.java)
-                intent.flags =
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
-                (context as? ComponentActivity)?.finish()
-
-            }) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Logout",
-                    tint = colorResource(id = R.color.Yellow),
-                    modifier = Modifier
-                        .size(36.dp)
-                )
-            }
-        }
-    )
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -78,13 +51,44 @@ fun InventoryScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    context: Context = LocalContext.current,
 ){
     val listState = rememberLazyListState()
 
+    var showDialog by remember { mutableStateOf(false) }
+
+
+
     Box( modifier = Modifier){
+
+        TopAppBar(
+            title = { Text(stringResource(id = R.string.daftar_barang),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 24.sp,) },
+            actions = {
+                IconButton(onClick = {
+                    showDialog = false
+                    val intent = Intent(context,AddActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                    (context as? ComponentActivity)?.finish()
+
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Logout",
+                        tint = colorResource(id = R.color.Yellow),
+                        modifier = Modifier
+                            .size(36.dp)
+                    )
+                }
+            }
+        )
         
         LazyColumn (state = listState,  contentPadding = PaddingValues(bottom = 80.dp), modifier = Modifier.padding(top = 48.dp)){
 

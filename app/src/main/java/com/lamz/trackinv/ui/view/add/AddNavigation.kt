@@ -1,27 +1,29 @@
-package com.lamz.trackinv.ui.view.welcome
+package com.lamz.trackinv.ui.view.add
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.lamz.trackinv.ui.navigation.Screen
+import com.lamz.trackinv.ui.screen.add.AddProductScreen
+import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.login.LoginScreen
 import com.lamz.trackinv.ui.screen.register.RegisterScreen
 
 @Composable
-fun AppNavigation() {
+fun AddNavigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route,
+        startDestination = Screen.Add.route,
     ) {
-        composable(Screen.Login.route) {
+        composable(Screen.Add.route) {
             // Your main composable function
-            LoginScreen(navController = navController)
+            AddScreen(navController = navController,)
         }
-        composable(Screen.Register.route) {
+        composable(Screen.AddProduct.route) {
             // Composable function for registration screen
-            RegisterScreen(navController = navController)
+            AddProductScreen(navController = navController)
 
         }
         // Add more destinations as needed

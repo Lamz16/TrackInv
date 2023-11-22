@@ -19,8 +19,10 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         dataStore.edit { preferences ->
             preferences[USERNAME_KEY] = user.username
             Log.d("This Email", "LoginContent: ${user.username}")
-            preferences[PASSWORD_KEY] = user.password
-            Log.d("This Password", "LoginContent: ${user.password}")
+            preferences[TOKEN_KEY] = user.token
+            preferences[NAME_KEY] = user.name
+            Log.d("This name", "LoginContent: ${user.name}")
+            Log.d("This token", "LoginContent: ${user.token}")
             preferences[IS_LOGIN_KEY] = true
         }
     }
@@ -29,7 +31,8 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         return dataStore.data.map { preferences ->
             UserModel(
                 preferences[USERNAME_KEY] ?: "",
-                preferences[PASSWORD_KEY] ?: "",
+                preferences[TOKEN_KEY] ?: "",
+                preferences[NAME_KEY] ?: "",
                 preferences[IS_LOGIN_KEY] ?: false
             )
         }
@@ -46,7 +49,8 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         private var INSTANCE: UserPreference? = null
 
         private val USERNAME_KEY = stringPreferencesKey("username")
-        private val PASSWORD_KEY = stringPreferencesKey("password")
+        private val TOKEN_KEY = stringPreferencesKey("token")
+        private val NAME_KEY = stringPreferencesKey("name")
         private val IS_LOGIN_KEY = booleanPreferencesKey("isLogin")
 
         fun getInstance(dataStore: DataStore<Preferences>): UserPreference {

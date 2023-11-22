@@ -2,6 +2,7 @@ package com.lamz.trackinv.ui.screen.login
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,6 +62,7 @@ import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.data.pref.UserModel
+import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
@@ -76,7 +81,7 @@ fun LoginScreen(
             .horizontalScroll(scrollStateHorizontal)
             .verticalScroll(scrollStateVertical),
 
-    ) {
+        ) {
         LoginContent(navController = navController)
     }
 }
@@ -92,13 +97,43 @@ fun LoginContent(
 ) {
 
 
-
     var showDialog by remember { mutableStateOf(false) }
     var showPassword by remember { mutableStateOf(value = false) }
 
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
+
+    var showLoading by remember { mutableStateOf(false) }
+    val uploadState by viewModel.upload.observeAsState()
+
+    when (val uiState = uploadState) {
+        is UiState.Loading -> {
+            showLoading = true
+        }
+
+        is UiState.Success -> {
+
+            showDialog = true
+            viewModel.saveSession(
+                UserModel(
+                    uiState.data.dataLoginPost.user.email,
+                    uiState.data.dataLoginPost.token,
+                    uiState.data.dataLoginPost.user.namaToko,
+                    true
+                )
+            )
+
+        }
+
+        is UiState.Error -> {
+            showLoading = false
+            Toast.makeText(context, "Password atau Email salah", Toast.LENGTH_SHORT).show()
+        }
+
+        else -> {}
+    }
+
 
     LaunchedEffect(true) {
         if (wasFocused) {
@@ -196,15 +231,26 @@ fun LoginContent(
 
         ElevatedButton(
             onClick = {
-                // Set showDialog to true when the button is clicked
-                showDialog = true
-                viewModel.saveSession(UserModel(viewModel.email, viewModel.password, true))
+                if (viewModel.password.length < 8) {
+                    Toast.makeText(context, "Password kurang dari 8", Toast.LENGTH_SHORT).show()
+                    return@ElevatedButton
+                }
+
+                viewModel.login(viewModel.email, viewModel.password)
+
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
         ) {
-            Text("LOGIN")
+            if (showLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.Gray
+                )
+            } else {
+                Text("LOGIN")
+            }
         }
 
         if (showDialog) {
@@ -214,10 +260,10 @@ fun LoginContent(
                     showDialog = false
                 },
                 title = {
-                    Text("Alert Dialog")
+                    Text("Login Berhasil")
                 },
                 text = {
-                    Text("Are you sure you want to proceed?")
+                    Text("Yuk lanjutin ke halaman selanjutnya")
                 },
                 confirmButton = {
                     Button(
@@ -236,36 +282,25 @@ fun LoginContent(
                         Text("Yes")
                     }
                 },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            showDialog = false
-                        },
-                        colors = ButtonDefaults.elevatedButtonColors(
-                            containerColor = Color.Black
-                        )
-                    ) {
-                        Text("No")
-                    }
-                }
             )
         }
-        
+
         Row {
             Text(text = stringResource(id = R.string.to_register))
 
-            ClickableText(text = AnnotatedString(stringResource(id = R.string.register)),
-            onClick = {
-                navController.navigate(Screen.Register.route){
-                    popUpTo(0)
-                }
-            },
+            ClickableText(
+                text = AnnotatedString(stringResource(id = R.string.register)),
+                onClick = {
+                    navController.navigate(Screen.Register.route) {
+                        popUpTo(0)
+                    }
+                },
                 style = TextStyle(
                     color = Color.Blue,
                     fontSize = 16.sp,
                 ),
 
-            )
+                )
         }
 
     }

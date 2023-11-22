@@ -1,11 +1,24 @@
 package com.lamz.trackinv.data
 
+import androidx.lifecycle.liveData
+import com.google.gson.Gson
+import com.lamz.trackinv.api.ApiConfig
+import com.lamz.trackinv.api.ApiService
 import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.data.pref.UserPreference
+import com.lamz.trackinv.helper.UiState
+import com.lamz.trackinv.response.auth.LoginResponse
+import com.lamz.trackinv.response.auth.RegisterResponse
+import com.lamz.trackinv.response.category.AddCategoryResponse
+import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import retrofit2.HttpException
 
 class TrackRepository private constructor(
-    private val userPreference: UserPreference
+    private val userPreference: UserPreference,
+    private val apiService: ApiService
 ) {
 
     suspend fun saveSession(user: UserModel) {
@@ -20,14 +33,80 @@ class TrackRepository private constructor(
         userPreference.logout()
     }
 
+    suspend fun registerAccount(email: String, password: String, username : String, namaToko : String, alamat : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            val successResponse = apiService.register(email,password,username,namaToko, alamat)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, RegisterResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun login(email: String, password: String) = liveData {
+        emit(UiState.Loading)
+        try {
+            val successResponse = apiService.login(email,password)
+            emit(UiState.Success(successResponse))
+        }catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, LoginResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
+    suspend fun addCategory(category : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.addCategory(category)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, AddCategoryResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    fun getCategory() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllCategory()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetAllCategoryResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
     companion object {
         @Volatile
         private var instance: TrackRepository? = null
         fun getInstance(
-            userPreference: UserPreference
+            userPreference: UserPreference,
+            apiService: ApiService
         ): TrackRepository =
             instance ?: synchronized(this) {
-                instance ?: TrackRepository(userPreference)
+                instance ?: TrackRepository(userPreference, apiService)
             }.also { instance = it }
     }
 }

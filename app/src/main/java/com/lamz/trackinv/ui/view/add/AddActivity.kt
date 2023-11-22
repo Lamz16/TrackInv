@@ -20,7 +20,7 @@ class AddActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AddScreen()
+                    AddNavigation()
                 }
             }
         }
