@@ -30,7 +30,7 @@ import com.lamz.trackinv.R
 @Composable
 fun CardLongItem(
     namaItem: String,
-    pieces: Int,
+    pieces: String,
     category: String,
     id: String,
     modifier: Modifier = Modifier,
@@ -87,7 +87,7 @@ fun CardLongItem(
                 text = stringResource(id = R.string.category)
             )
             Text(
-                text = stringResource(id = R.string.id)
+                text = stringResource(id = R.string.harga_beli)
             )
         }
         Row (
@@ -97,7 +97,7 @@ fun CardLongItem(
                 .padding(start = 20.dp, end = 20.dp, top = 10.dp)
         ){
             Text(
-                text = stringResource(id = R.string.pieces, pieces)
+                text = pieces
             )
             Text(
                 text = category
@@ -114,5 +114,5 @@ fun CardLongItem(
 @Preview(showBackground = true)
 @Composable
 fun CardLongItemPreview(){
-    CardLongItem("IndoFood",10,"accesoris","0")
+    CardLongItem("IndoFood","10","accesoris","0")
 }

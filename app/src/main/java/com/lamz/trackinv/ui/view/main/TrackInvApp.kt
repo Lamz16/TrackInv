@@ -25,7 +25,6 @@ import com.lamz.trackinv.R
 import com.lamz.trackinv.ui.navigation.NavigationItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.screen.account.AccountScreen
-import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.home.HomeScreen
 import com.lamz.trackinv.ui.screen.inventory.InventoryScreen
 import com.lamz.trackinv.ui.theme.TrackInvTheme

@@ -4,10 +4,14 @@ import com.lamz.trackinv.response.auth.LoginResponse
 import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.product.AddProductResponse
+import com.lamz.trackinv.response.product.GetProductResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
     @FormUrlEncoded
@@ -36,6 +40,12 @@ interface ApiService {
     @GET("categories")
     suspend fun getAllCategory(): GetAllCategoryResponse
 
+    @GET("categories/{id}")
+    suspend fun getCategoryId(
+        @Path("id") id: String
+    ): GetCategoryIdResponse
+
+
     @FormUrlEncoded
     @POST("products")
     suspend fun addProduct(
@@ -44,6 +54,8 @@ interface ApiService {
         @Field("categoryId") category : String,
         @Field("hargaBeli") hargabeli : Int,
         @Field("hargaJual") hargaJual : Int,
-    ) : AddCategoryResponse
+    ) : AddProductResponse
 
+    @GET("products")
+    suspend fun getAllProduct(): GetProductResponse
 }

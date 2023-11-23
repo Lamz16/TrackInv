@@ -8,6 +8,7 @@ import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.ui.screen.account.AccountViewModel
 import com.lamz.trackinv.ui.screen.add.AddViewModel
 import com.lamz.trackinv.ui.screen.home.HomeViewModel
+import com.lamz.trackinv.ui.screen.inventory.InventoryViewModel
 import com.lamz.trackinv.ui.screen.login.LoginViewModel
 import com.lamz.trackinv.ui.screen.register.RegisterViewModel
 import com.lamz.trackinv.ui.view.main.MainViewModel
@@ -22,6 +23,9 @@ class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvi
             }
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(InventoryViewModel::class.java) -> {
+                InventoryViewModel(repository) as T
             }
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
                 LoginViewModel(repository) as T

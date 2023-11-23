@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -57,6 +58,7 @@ import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.ui.component.CardCategoryItem
 import com.lamz.trackinv.ui.view.add.AddActivity
 import com.lamz.trackinv.ui.view.main.MainActivity
 
@@ -64,6 +66,7 @@ import com.lamz.trackinv.ui.view.main.MainActivity
 fun AddScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    navigateToDetail: (String) -> Unit,
 
     ) {
     Box(
@@ -72,7 +75,7 @@ fun AddScreen(
             .fillMaxSize()
 
     ) {
-        AddContent()
+        AddContent(navigateToDetail =navigateToDetail )
     }
 
 }
@@ -86,6 +89,7 @@ fun AddContent(
     viewModel: AddViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
+    navigateToDetail: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showCategory by remember { mutableStateOf(false) }
@@ -303,7 +307,9 @@ fun AddContent(
 
                     // Display each category in LazyColumn
                     items(categories) { category ->
-                        Text(text = category.name, modifier = Modifier.padding(16.dp))
+                        CardCategoryItem(nameCategory = category.name, modifier = Modifier.clickable{
+                            navigateToDetail(category.id)
+                        })
                     }
                 }
                 is UiState.Error -> {

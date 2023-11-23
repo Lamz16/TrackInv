@@ -152,7 +152,7 @@ fun HomeContent(
             fontSize = 24.sp,
         )
 
-        CardLongItem(namaItem = "Gula", pieces = 200, category = "Sembako", id = "39210237L")
+        CardLongItem(namaItem = "Gula", pieces = "200", category = "Sembako", id = "39210237L")
     }
 
 

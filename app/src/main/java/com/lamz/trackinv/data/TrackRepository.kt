@@ -11,6 +11,9 @@ import com.lamz.trackinv.response.auth.LoginResponse
 import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.product.AddProductResponse
+import com.lamz.trackinv.response.product.GetProductResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -80,7 +83,7 @@ class TrackRepository private constructor(
 
     }
 
-    fun getCategory() = liveData {
+    suspend fun getCategory() = liveData {
         emit(UiState.Loading)
         try {
             userPreference.getSession()
@@ -91,6 +94,60 @@ class TrackRepository private constructor(
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, GetAllCategoryResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun addProduct( name : String,stock : String,category : String,hargabeli : Int,hargaJual : Int,) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.addProduct(name, stock, category, hargabeli, hargaJual)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, AddProductResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getCategoryId(id : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getCategoryId(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getProduct() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllProduct()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetProductResponse::class.java)
             emit(UiState.Error(errorResponse.toString()))
         } catch (e: Exception) {
             emit(UiState.Error("Error : ${e.message.toString()}"))
