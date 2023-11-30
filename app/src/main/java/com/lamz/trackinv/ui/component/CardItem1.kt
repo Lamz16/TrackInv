@@ -3,6 +3,7 @@ package com.lamz.trackinv.ui.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import com.lamz.trackinv.R
 @Composable
 fun CardItem1(
     image : Int,
+    stok : String,
     title: String,
     modifier : Modifier = Modifier
 )
@@ -37,17 +39,26 @@ fun CardItem1(
             verticalArrangement = Arrangement.Center
 
         ){
-            Image(painter = painterResource(image),
-                contentDescription = null,
-                modifier= Modifier
-                    .size(40.dp)
-                    .padding(10.dp))
+            Row {
+                Image(painter = painterResource(image),
+                    contentDescription = null,
+                    modifier= Modifier
+                        .size(40.dp)
+                        .padding(10.dp))
 
+                Text(
+                    text = stok,
+                    modifier = Modifier
+                        .padding(10.dp),
+                    color = colorResource(id = R.color.white),
+                    fontSize = 10.sp
+                )
+            }
             
             Text(
                 text = title,
                 modifier = Modifier
-                    .padding(start = 10.dp,top = 30.dp),
+                    .padding(start = 10.dp,top = 8.dp),
                 color = colorResource(id = R.color.white),
                 fontSize = 10.sp
              )

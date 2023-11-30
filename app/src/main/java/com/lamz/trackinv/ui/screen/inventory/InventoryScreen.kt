@@ -1,8 +1,7 @@
 package com.lamz.trackinv.ui.screen.inventory
 
 import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,18 +34,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.ui.component.CardLongItem
-import com.lamz.trackinv.ui.view.add.AddActivity
+import com.lamz.trackinv.ui.navigation.Screen
 
 
 @Composable
 fun InventoryScreen(
     modifier: Modifier = Modifier,
+    navController: NavHostController,
+    navigateToDetail: (String) -> Unit,
 
     ) {
 
@@ -54,7 +56,7 @@ fun InventoryScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        InventoryContent()
+        InventoryContent(navController = navController, navigateToDetail = navigateToDetail,)
     }
 }
 
@@ -66,6 +68,8 @@ fun InventoryContent(
     viewModel: InventoryViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
+    navController: NavHostController,
+    navigateToDetail: (String) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
@@ -84,7 +88,7 @@ fun InventoryContent(
         }
     }
 
-    Box{
+    Box {
         TopAppBar(
             title = {
                 Text(
@@ -96,12 +100,7 @@ fun InventoryContent(
             actions = {
                 IconButton(onClick = {
                     showDialog = false
-                    val intent = Intent(context, AddActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
-                    (context as? ComponentActivity)?.finish()
-
+                    navController.navigate(Screen.Add.route)
                 }) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
@@ -122,12 +121,16 @@ fun InventoryContent(
                 is UiState.Loading -> {
 
                 }
+
                 is UiState.Success -> {
 
                     val products = (productState as UiState.Success<GetProductResponse>).data.data
 
                     items(products) { inventory ->
                         CardLongItem(
+                            modifier = Modifier.clickable {
+                                navigateToDetail(inventory.id)
+                            },
                             namaItem = inventory.name,
                             pieces = inventory.stok.toString(),
                             category = inventory.category.name,
@@ -136,14 +139,13 @@ fun InventoryContent(
                     }
 
                 }
+
                 is UiState.Error -> {
 
                 }
 
                 else -> {}
             }
-
-
         }
     }
 }

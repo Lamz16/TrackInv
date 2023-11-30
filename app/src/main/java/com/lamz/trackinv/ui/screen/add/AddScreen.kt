@@ -59,7 +59,7 @@ import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.ui.component.CardCategoryItem
-import com.lamz.trackinv.ui.view.add.AddActivity
+import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
@@ -75,7 +75,8 @@ fun AddScreen(
             .fillMaxSize()
 
     ) {
-        AddContent(navigateToDetail =navigateToDetail )
+        AddContent(navigateToDetail = navigateToDetail,
+            navController = navController)
     }
 
 }
@@ -90,6 +91,7 @@ fun AddContent(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
     navigateToDetail: (String) -> Unit,
+    navController: NavHostController,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showCategory by remember { mutableStateOf(false) }
@@ -107,23 +109,18 @@ fun AddContent(
         is UiState.Loading -> {
 
         }
+
         is UiState.Success -> {
             showCategory = false
             Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            val intent = Intent(context, AddActivity::class.java)
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            (context as? ComponentActivity)?.finish()
-
+            navController.navigate(Screen.Add.route)
         }
+
         is UiState.Error -> {
             Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            val intent = Intent(context, AddActivity::class.java)
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            (context as? ComponentActivity)?.finish()
+            navController.navigate(Screen.Add.route) {
+                popUpTo(0)
+            }
 
         }
 
@@ -293,8 +290,10 @@ fun AddContent(
             )
         }
 
-        LazyColumn( state = listState,  contentPadding = PaddingValues(bottom = 120.dp),
-            modifier = Modifier.padding(top = 48.dp)) {
+        LazyColumn(
+            state = listState, contentPadding = PaddingValues(bottom = 120.dp),
+            modifier = Modifier.padding(top = 48.dp)
+        ) {
             // Observe the LiveData for category data
 
 
@@ -302,21 +301,28 @@ fun AddContent(
                 is UiState.Loading -> {
                     // Display loading indicator if needed
                 }
+
                 is UiState.Success -> {
-                    val categories = (categoryState as UiState.Success<GetAllCategoryResponse>).data.data
+                    val categories =
+                        (categoryState as UiState.Success<GetAllCategoryResponse>).data.data
 
                     // Display each category in LazyColumn
                     items(categories) { category ->
-                        CardCategoryItem(nameCategory = category.name, modifier = Modifier.clickable{
-                            navigateToDetail(category.id)
-                        })
+                        CardCategoryItem(
+                            nameCategory = category.name,
+                            modifier = Modifier.clickable {
+                                navigateToDetail(category.id)
+                            })
                     }
                 }
+
                 is UiState.Error -> {
                     // Handle error state if needed
                 }
+
                 else -> {}
             }
+
 
         }
     }

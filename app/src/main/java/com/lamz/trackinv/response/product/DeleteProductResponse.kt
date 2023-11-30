@@ -2,16 +2,7 @@ package com.lamz.trackinv.response.product
 
 import com.google.gson.annotations.SerializedName
 
-data class GetProductResponse(
-
-	@field:SerializedName("data")
-	val data: List<DataItem>,
-
-	@field:SerializedName("success")
-	val success: Boolean
-)
-
-data class DataItem(
+data class DeleteProductResponse(
 
 	@field:SerializedName("name")
 	val name: String,
@@ -22,17 +13,17 @@ data class DataItem(
 	@field:SerializedName("hargaJual")
 	val hargaJual: Int,
 
-	@field:SerializedName("stock")
+	@field:SerializedName("stok")
 	val stok: Int,
 
 	@field:SerializedName("category")
-	val category: CategoryId,
+	val category: CategoryDelete,
 
 	@field:SerializedName("hargaBeli")
 	val hargaBeli: Int
 )
 
-data class CategoryId(
+data class CategoryDelete(
 
 	@field:SerializedName("name")
 	val name: String,

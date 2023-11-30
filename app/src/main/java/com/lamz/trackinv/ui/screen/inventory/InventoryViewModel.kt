@@ -7,9 +7,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.response.product.DataItem
 import com.lamz.trackinv.response.product.GetProductResponse
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class InventoryViewModel(private val repository: TrackRepository): ViewModel(){
@@ -24,5 +23,4 @@ class InventoryViewModel(private val repository: TrackRepository): ViewModel(){
             }
         }
     }
-
 }

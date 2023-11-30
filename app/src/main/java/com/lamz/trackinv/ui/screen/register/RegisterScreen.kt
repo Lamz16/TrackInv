@@ -352,7 +352,6 @@ fun RegisterContent(
               Toast.makeText(context,"Password kurang dari 8", Toast.LENGTH_SHORT).show()
                     return@ElevatedButton
                 }
-
                 // Set showDialog to true when the button is clicked
                 viewModel.uploadData(
                     viewModel.email,

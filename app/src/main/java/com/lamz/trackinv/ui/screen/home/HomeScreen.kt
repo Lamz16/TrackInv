@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -60,9 +61,14 @@ fun HomeContent(
     ),
 ) {
 
+    val productState by viewModel.getProduct.observeAsState()
     val sessionData by viewModel.getSession().observeAsState()
 
     var showDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        viewModel.getAllProductsMenipis()
+    }
 
     TopAppBar(
         title = {
@@ -133,9 +139,14 @@ fun HomeContent(
                 .padding(top = 58.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            CardItem1(R.drawable.ic_stok_tersedia, stringResource(id = R.string.tersedia))
-            CardItem1(R.drawable.ic_menipis, stringResource(id = R.string.menipis))
-            CardItem1(R.drawable.ic_stok_habis, stringResource(id = R.string.habis))
+
+            val productTersedia by viewModel.stokTersedia.observeAsState(emptyList())
+            val productMenipis by viewModel.stokMenipis.observeAsState(emptyList())
+            val productHabis by viewModel.stokhabis.observeAsState(emptyList())
+
+            CardItem1(R.drawable.ic_stok_tersedia,productTersedia.size.toString(), stringResource(id = R.string.tersedia))
+            CardItem1(R.drawable.ic_menipis,productMenipis.size.toString() , stringResource(id = R.string.menipis))
+            CardItem1(R.drawable.ic_stok_habis, productHabis.size.toString() ,stringResource(id = R.string.habis))
         }
 
         Row(

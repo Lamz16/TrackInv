@@ -17,16 +17,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ui.navigation.NavigationItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.screen.account.AccountScreen
+import com.lamz.trackinv.ui.screen.add.AddProductScreen
+import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.home.HomeScreen
 import com.lamz.trackinv.ui.screen.inventory.InventoryScreen
+import com.lamz.trackinv.ui.screen.inventory.detail.InvDetailScreen
 import com.lamz.trackinv.ui.theme.TrackInvTheme
 
 @Composable
@@ -97,7 +102,9 @@ fun TrackInvApp(
 
     Scaffold(
         bottomBar = {
-            if (currentRoute != Screen.DetailInventory.route) {
+            if (currentRoute != Screen.DetailInventory.route &&
+                currentRoute != Screen.Add.route &&
+                currentRoute != Screen.AddProduct.route) {
                 BottomBar(navController)
             }
         },
@@ -112,10 +119,43 @@ fun TrackInvApp(
               HomeScreen()
             }
             composable(Screen.Inventory.route) {
-                InventoryScreen()
+                InventoryScreen(navController = navController,
+                    navigateToDetail = {inventoryId ->
+                        navController.navigate(Screen.DetailInventory.createRoute(inventoryId))
+                    })
             }
+            composable(
+                route = Screen.DetailInventory.route,
+                arguments = listOf(navArgument("inventoryId") {type = NavType.StringType })
+            ) {
+                // Composable function for registration screen
+                val inventoryId = it.arguments?.getString("inventoryId") ?: " "
+                InvDetailScreen(
+                    inventoryId = inventoryId,
+                    navController = navController)
+
+            }
+
             composable(Screen.Profile.route) {
                 AccountScreen()
+            }
+            composable(Screen.Add.route) {
+                // Your main composable function
+                AddScreen(navController = navController,
+                    navigateToDetail = {categoryId ->
+                        navController.navigate(Screen.AddProduct.createRoute(categoryId))
+                    })
+            }
+            composable(
+                route = Screen.AddProduct.route,
+                arguments = listOf(navArgument("categoryId") {type = NavType.StringType })
+            ) {
+                // Composable function for registration screen
+                val categoryId = it.arguments?.getString("categoryId") ?: "sembako"
+                AddProductScreen(
+                    categoryId = categoryId,
+                    navController = navController)
+
             }
 
         }

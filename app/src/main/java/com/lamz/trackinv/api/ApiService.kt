@@ -6,11 +6,16 @@ import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
 import com.lamz.trackinv.response.product.AddProductResponse
+import com.lamz.trackinv.response.product.DeleteProductResponse
+import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.response.product.GetProductResponse
+import com.lamz.trackinv.response.product.UpdateProductResponse
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ApiService {
@@ -58,4 +63,26 @@ interface ApiService {
 
     @GET("products")
     suspend fun getAllProduct(): GetProductResponse
+
+    @GET("products/{id}")
+    suspend fun getProductId(
+        @Path("id") id: String
+    ): GetProductByIdResponse
+
+    @DELETE("products/{id}")
+    suspend fun deleteProdct(
+        @Path("id") id: String
+    ): DeleteProductResponse
+
+    @FormUrlEncoded
+    @PUT("products/{id}")
+    suspend fun updateProduct(
+        @Path("id") id : String,
+        @Field("name") name: String,
+        @Field("stock") stock: String,
+        @Field("categoryId") category: String,
+        @Field("hargaBeli") hargabeli: Int,
+        @Field("hargaJual") hargaJual: Int,
+    ): UpdateProductResponse
+
 }

@@ -13,7 +13,10 @@ import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
 import com.lamz.trackinv.response.product.AddProductResponse
+import com.lamz.trackinv.response.product.DeleteProductResponse
+import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.response.product.GetProductResponse
+import com.lamz.trackinv.response.product.UpdateProductResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -148,6 +151,58 @@ class TrackRepository private constructor(
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, GetProductResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getProductId(id : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getProductId(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetProductByIdResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
+    suspend fun deleteProducts(id : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.deleteProdct(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, DeleteProductResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
+    suspend fun updateProduct( id : String, name : String,stock : String,category : String,hargabeli : Int,hargaJual : Int,) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.updateProduct(id,name, stock, category, hargabeli, hargaJual)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, UpdateProductResponse::class.java)
             emit(UiState.Error(errorResponse.toString()))
         } catch (e: Exception) {
             emit(UiState.Error("Error : ${e.message.toString()}"))

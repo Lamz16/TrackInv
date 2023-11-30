@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
@@ -24,8 +22,6 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,8 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -54,6 +48,7 @@ import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
+import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.view.main.MainActivity
 
@@ -225,93 +220,14 @@ fun AddProductContent(
 
 
         val containerColor = colorResource(id = R.color.lavender)
-        OutlinedTextField(
-            value = viewModel.namaBarang,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                disabledContainerColor = containerColor,
-            ),
-            label = { Text(text = "Nama Barang") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            singleLine = true,
-            onValueChange = { newInput ->
-                viewModel.namaBarang = newInput
-            },
-            shape = RoundedCornerShape(size = 20.dp),
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    isFocused = it.isFocused
-                },
-        )
 
-        OutlinedTextField(
-            value = viewModel.stokBarang,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                disabledContainerColor = containerColor,
-            ),
-            label = { Text(text = "Stok Barang") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            onValueChange = { newInput ->
-                viewModel.stokBarang = newInput
-            },
-            shape = RoundedCornerShape(size = 20.dp),
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    isFocused = it.isFocused
-                },
-        )
 
-        OutlinedTextField(
-            value = viewModel.hargaBeli,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                disabledContainerColor = containerColor,
-            ),
-            label = { Text(text = "Harga Beli") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            onValueChange = { newInput ->
-                viewModel.hargaBeli = newInput
-            },
-            shape = RoundedCornerShape(size = 20.dp),
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    isFocused = it.isFocused
-                },
-        )
+/**       Using component view for set input column */
 
-        OutlinedTextField(
-            value = viewModel.hargaJual,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                disabledContainerColor = containerColor,
-            ),
-            label = { Text(text = "Harga Jual") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            onValueChange = { newInput ->
-                viewModel.hargaJual = newInput
-            },
-            shape = RoundedCornerShape(size = 20.dp),
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    isFocused = it.isFocused
-                },
-        )
+        OutLinedTextItem(viewModel.namaBarang,text = "Nama Barang", containerColor = containerColor, keyboardType = KeyboardType.Text , onValueChange = {viewModel.namaBarang = it})
+        OutLinedTextItem(viewModel.stokBarang,text = "Stok Barang", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.stokBarang = it})
+        OutLinedTextItem(viewModel.hargaBeli,text = "Harga Beli", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.hargaBeli = it})
+        OutLinedTextItem(viewModel.hargaJual,text = "Harga Jual", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.hargaJual = it})
 
         ElevatedButton(
             onClick = {
@@ -330,6 +246,4 @@ fun AddProductContent(
             Text("Tambah")
         }
     }
-
-
 }
