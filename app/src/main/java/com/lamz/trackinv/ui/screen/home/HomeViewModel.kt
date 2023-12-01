@@ -6,11 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.product.DataItem
 import com.lamz.trackinv.response.product.GetProductResponse
+import com.lamz.trackinv.response.transaksi.OutgoingResponse
 import kotlinx.coroutines.launch
 
 
@@ -28,6 +30,9 @@ class HomeViewModel(private val repository: TrackRepository) : ViewModel() {
 
     private val _stokHabis = MutableLiveData<List<DataItem>>(emptyList())
     val stokhabis: LiveData<List<DataItem>> = _stokHabis
+
+    private val _upload = MutableLiveData<UiState<OutgoingResponse>>()
+    val upload: LiveData<UiState<OutgoingResponse>> = _upload
 
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
@@ -59,6 +64,22 @@ class HomeViewModel(private val repository: TrackRepository) : ViewModel() {
                     else -> _getProduct.value = it
                 }
 
+            }
+        }
+    }
+
+    fun outgoingTran(partnerId : String, items : List<ItemsProduct>) {
+        viewModelScope.launch {
+            repository.outgoingTran(partnerId, items).asFlow().collect {
+                _upload.value = it
+            }
+        }
+    }
+
+    fun incomingTran(partnerId : String, items : List<ItemsProduct>) {
+        viewModelScope.launch {
+            repository.incomingTran(partnerId, items).asFlow().collect {
+                _upload.value = it
             }
         }
     }

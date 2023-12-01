@@ -17,6 +17,7 @@ import com.lamz.trackinv.response.product.DeleteProductResponse
 import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.response.product.UpdateProductResponse
+import com.lamz.trackinv.response.transaksi.OutgoingResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -208,6 +209,42 @@ class TrackRepository private constructor(
             emit(UiState.Error("Error : ${e.message.toString()}"))
         }
 
+    }
+
+    suspend fun outgoingTran(partnerId : String, items : List<ItemsProduct>) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val outgoingRequest = OutGoing(partnerId, items)
+            val successResponse = apiService.outGoingTran(partnerId, outgoingRequest)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, OutgoingResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
+    suspend fun incomingTran(partnerId : String, items : List<ItemsProduct>) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val incomingRequest = OutGoing(partnerId, items)
+            val successResponse = apiService.incomingTran(partnerId, incomingRequest)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, OutgoingResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
     }
 
     companion object {

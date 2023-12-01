@@ -2,13 +2,13 @@ package com.lamz.trackinv.response.transaksi
 
 import com.google.gson.annotations.SerializedName
 
-data class InComingResponse(
+data class IncomingOutgoingResponse(
 
 	@field:SerializedName("createdAt")
 	val createdAt: String,
 
 	@field:SerializedName("partner")
-	val partner: PartnerIncom,
+	val partner: PartnerIncoming,
 
 	@field:SerializedName("totalHarga")
 	val totalHarga: Int,
@@ -20,7 +20,7 @@ data class InComingResponse(
 	val type: String
 )
 
-data class PartnerIncom(
+data class PartnerIncoming(
 
 	@field:SerializedName("name")
 	val name: String,

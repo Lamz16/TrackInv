@@ -22,18 +22,18 @@ data class Partner(
 
 data class DataItem(
 
-	@field:SerializedName("createdAt")
+    @field:SerializedName("createdAt")
 	val createdAt: String,
 
-	@field:SerializedName("partner")
+    @field:SerializedName("partner")
 	val partner: Partner,
 
-	@field:SerializedName("totalHarga")
+    @field:SerializedName("totalHarga")
 	val totalHarga: Int,
 
-	@field:SerializedName("id")
+    @field:SerializedName("id")
 	val id: String,
 
-	@field:SerializedName("type")
+    @field:SerializedName("type")
 	val type: String
 )
