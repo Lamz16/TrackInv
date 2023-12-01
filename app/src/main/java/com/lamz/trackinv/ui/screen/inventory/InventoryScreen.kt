@@ -1,23 +1,33 @@
 package com.lamz.trackinv.ui.screen.inventory
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -26,21 +36,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
+import com.lamz.trackinv.response.product.DataItem
 import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.ui.component.CardLongItem
+import com.lamz.trackinv.ui.component.SearchBar
 import com.lamz.trackinv.ui.navigation.Screen
 
 
@@ -49,18 +63,16 @@ fun InventoryScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
-
-    ) {
-
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        InventoryContent(navController = navController, navigateToDetail = navigateToDetail,)
+        InventoryContent(navController = navController, navigateToDetail = navigateToDetail)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun InventoryContent(
     modifier: Modifier = Modifier,
@@ -71,62 +83,54 @@ fun InventoryContent(
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    val focusRequester = remember { FocusRequester() }
+    var query by remember { mutableStateOf(TextFieldValue()) }
     var isFocused by remember { mutableStateOf(false) }
-    val wasFocused = remember { isFocused }
-
+    val focusRequester = remember { FocusRequester() }
     var showDialog by remember { mutableStateOf(false) }
     val productState by viewModel.getProduct.observeAsState()
 
-
-
     LaunchedEffect(true) {
         viewModel.getAllProduct()
-        if (wasFocused) {
+        if (isFocused) {
             focusRequester.requestFocus()
         }
     }
 
-    Box {
-        TopAppBar(
-            title = {
-                Text(
-                    stringResource(id = R.string.daftar_barang),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 24.sp,
-                )
-            },
-            actions = {
-                IconButton(onClick = {
-                    showDialog = false
-                    navController.navigate(Screen.Add.route)
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.AddCircle,
-                        contentDescription = "Logout",
-                        tint = colorResource(id = R.color.Yellow),
-                        modifier = Modifier
-                            .size(36.dp)
-                    )
+    var filteredProducts by remember(productState, query.text) {
+        mutableStateOf<List<DataItem>>(emptyList())
+    }
+
+    DisposableEffect(productState, query.text) {
+        when (productState) {
+            is UiState.Success -> {
+                val allProducts = (productState as UiState.Success<GetProductResponse>).data.data
+                filteredProducts = if (query.text.isNotEmpty()) {
+                    allProducts.filter {
+                        it.name.contains(query.text, ignoreCase = true) ||
+                                it.category.name.contains(query.text, ignoreCase = true) ||
+                                it.hargaBeli.toString().contains(query.text, ignoreCase = true)
+                    }
+                } else {
+                    allProducts
                 }
             }
-        )
+            else -> {}
+        }
+        onDispose { }
+    }
 
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
+    ) {
         LazyColumn(
-            state = listState, contentPadding = PaddingValues(bottom = 80.dp),
-            modifier = Modifier.padding(top = 48.dp)
+            state = rememberLazyListState(),
+            contentPadding = PaddingValues(top = 80.dp, bottom = 80.dp),
+            modifier = Modifier.padding(top = 8.dp)
         ) {
             when (productState) {
-                is UiState.Loading -> {
-
-                }
-
                 is UiState.Success -> {
-
-                    val products = (productState as UiState.Success<GetProductResponse>).data.data
-
-                    items(products) { inventory ->
+                    items(filteredProducts) { inventory ->
                         CardLongItem(
                             modifier = Modifier.clickable {
                                 navigateToDetail(inventory.id)
@@ -137,15 +141,55 @@ fun InventoryContent(
                             id = inventory.hargaBeli.toString()
                         )
                     }
-
                 }
-
-                is UiState.Error -> {
-
-                }
-
                 else -> {}
             }
+        }
+
+        SearchBar(
+            value = query.text,
+            onValueChange = { query = TextFieldValue(it) },
+            placeholder = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text("Search...")
+                }
+            },
+            onSearch = {
+
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.background)
+        )
+
+        FloatingActionButton(
+            shape = CircleShape,
+            containerColor = colorResource(id = R.color.black40),
+            onClick = {
+                showDialog = false
+                navController.navigate(Screen.Add.route)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = "Add",
+                tint = colorResource(id = R.color.Yellow),
+                modifier = Modifier.size(36.dp)
+            )
         }
     }
 }

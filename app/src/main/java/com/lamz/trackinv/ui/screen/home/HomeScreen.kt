@@ -1,8 +1,7 @@
 package com.lamz.trackinv.ui.screen.home
 
 import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,12 +37,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.ui.component.CardItem1
 import com.lamz.trackinv.ui.component.CardItem2
 import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.component.TextItem
-import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
 fun HomeScreen() {
@@ -61,7 +57,6 @@ fun HomeContent(
     ),
 ) {
 
-    val productState by viewModel.getProduct.observeAsState()
     val sessionData by viewModel.getSession().observeAsState()
 
     var showDialog by remember { mutableStateOf(false) }
@@ -153,8 +148,12 @@ fun HomeContent(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            CardItem2(R.drawable.ic_stok_masuk, stringResource(id = R.string.stok_masuk))
-            CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar))
+            CardItem2(R.drawable.ic_stok_masuk, stringResource(id = R.string.stok_masuk), modifier = Modifier.clickable {
+
+            })
+            CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar), modifier = Modifier.clickable {
+
+            })
         }
 
         TextItem(
