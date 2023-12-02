@@ -17,6 +17,7 @@ import com.lamz.trackinv.response.product.DeleteProductResponse
 import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.response.product.UpdateProductResponse
+import com.lamz.trackinv.response.transaksi.GetTransactionResponse
 import com.lamz.trackinv.response.transaksi.OutgoingResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -204,6 +205,24 @@ class TrackRepository private constructor(
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, UpdateProductResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getTransaction() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getTransaction()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetTransactionResponse::class.java)
             emit(UiState.Error(errorResponse.toString()))
         } catch (e: Exception) {
             emit(UiState.Error("Error : ${e.message.toString()}"))

@@ -12,6 +12,7 @@ import com.lamz.trackinv.ui.screen.inventory.InventoryViewModel
 import com.lamz.trackinv.ui.screen.inventory.detail.InvDetailViewModel
 import com.lamz.trackinv.ui.screen.login.LoginViewModel
 import com.lamz.trackinv.ui.screen.register.RegisterViewModel
+import com.lamz.trackinv.ui.screen.transactions.TransactionsViewModel
 import com.lamz.trackinv.ui.view.main.MainViewModel
 
 class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvider.NewInstanceFactory() {
@@ -42,6 +43,9 @@ class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvi
             }
             modelClass.isAssignableFrom(InvDetailViewModel::class.java) -> {
                 InvDetailViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(TransactionsViewModel::class.java) -> {
+                TransactionsViewModel(repository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }

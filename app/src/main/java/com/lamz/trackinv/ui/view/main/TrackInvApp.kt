@@ -32,17 +32,18 @@ import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.home.HomeScreen
 import com.lamz.trackinv.ui.screen.inventory.InventoryScreen
 import com.lamz.trackinv.ui.screen.inventory.detail.InvDetailScreen
+import com.lamz.trackinv.ui.screen.transactions.TransactionsScreen
 import com.lamz.trackinv.ui.theme.TrackInvTheme
 
 @Composable
 private fun BottomBar(
     navController: NavController,
     modifier: Modifier = Modifier
-){
-    NavigationBar (
+) {
+    NavigationBar(
         modifier = modifier,
         containerColor = colorResource(id = R.color.black40)
-    ){
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -58,16 +59,22 @@ private fun BottomBar(
                 screen = Screen.Inventory
             ),
             NavigationItem(
+                title = stringResource(R.string.menu_transactions),
+                icon = ImageBitmap.imageResource(id = R.drawable.ic_transactions),
+                screen = Screen.Transactions
+            ),
+            NavigationItem(
                 title = stringResource(R.string.menu_profile),
                 icon = ImageBitmap.imageResource(id = R.drawable.ic_profile),
                 screen = Screen.Profile
             ),
-        )
+
+            )
         navigationItems.map { item ->
             NavigationBarItem(
                 icon = {
                     Icon(
-                         bitmap = item.icon,
+                        bitmap = item.icon,
                         contentDescription = item.title,
                         tint = colorResource(id = R.color.Yellow)
                     )
@@ -104,7 +111,8 @@ fun TrackInvApp(
         bottomBar = {
             if (currentRoute != Screen.DetailInventory.route &&
                 currentRoute != Screen.Add.route &&
-                currentRoute != Screen.AddProduct.route) {
+                currentRoute != Screen.AddProduct.route
+            ) {
                 BottomBar(navController)
             }
         },
@@ -116,24 +124,29 @@ fun TrackInvApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-              HomeScreen()
+                HomeScreen()
             }
             composable(Screen.Inventory.route) {
                 InventoryScreen(navController = navController,
-                    navigateToDetail = {inventoryId ->
+                    navigateToDetail = { inventoryId ->
                         navController.navigate(Screen.DetailInventory.createRoute(inventoryId))
                     })
             }
             composable(
                 route = Screen.DetailInventory.route,
-                arguments = listOf(navArgument("inventoryId") {type = NavType.StringType })
+                arguments = listOf(navArgument("inventoryId") { type = NavType.StringType })
             ) {
                 // Composable function for registration screen
                 val inventoryId = it.arguments?.getString("inventoryId") ?: " "
                 InvDetailScreen(
                     inventoryId = inventoryId,
-                    navController = navController)
+                    navController = navController
+                )
 
+            }
+
+            composable(Screen.Transactions.route) {
+                TransactionsScreen()
             }
 
             composable(Screen.Profile.route) {
@@ -142,19 +155,20 @@ fun TrackInvApp(
             composable(Screen.Add.route) {
                 // Your main composable function
                 AddScreen(navController = navController,
-                    navigateToDetail = {categoryId ->
+                    navigateToDetail = { categoryId ->
                         navController.navigate(Screen.AddProduct.createRoute(categoryId))
                     })
             }
             composable(
                 route = Screen.AddProduct.route,
-                arguments = listOf(navArgument("categoryId") {type = NavType.StringType })
+                arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
             ) {
                 // Composable function for registration screen
                 val categoryId = it.arguments?.getString("categoryId") ?: "sembako"
                 AddProductScreen(
                     categoryId = categoryId,
-                    navController = navController)
+                    navController = navController
+                )
 
             }
 
@@ -166,7 +180,7 @@ fun TrackInvApp(
 @Preview(showBackground = true)
 @Composable
 fun TrackInvAppPreview() {
-     TrackInvTheme{
+    TrackInvTheme {
         TrackInvApp()
     }
 }

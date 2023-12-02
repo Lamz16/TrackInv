@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -49,9 +52,10 @@ import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
+import com.lamz.trackinv.response.transaksi.GetTransactionResponse
 import com.lamz.trackinv.ui.component.CardItem1
 import com.lamz.trackinv.ui.component.CardItem2
-import com.lamz.trackinv.ui.component.CardLongItem
+import com.lamz.trackinv.ui.component.CardItemTransactions
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.view.main.MainActivity
 
@@ -82,6 +86,9 @@ fun HomeContent(
     val fakeIdCustomer = "afc9a85d-fe69-4f30-a95d-1af879795754"
     val wasFocused = remember { isFocused }
     val uploadState by viewModel.upload.observeAsState()
+    val transactionState by viewModel.getTransaction.observeAsState()
+
+
 
     when (uploadState) {
         is UiState.Loading -> {
@@ -105,6 +112,7 @@ fun HomeContent(
 
     LaunchedEffect(true) {
         viewModel.getAllProductsMenipis()
+        viewModel.getTransaction()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -234,7 +242,7 @@ fun HomeContent(
                         Button(
                             onClick = {
                                 val itemsList = listOf(ItemsProduct(fakeIdbarang, qty.toInt()))
-                                viewModel.outgoingTran(fakeIdCustomer, itemsList)
+                                viewModel.incomingTran(fakeIdCustomer, itemsList)
                             },
                             colors = ButtonDefaults.elevatedButtonColors(
                                 containerColor = colorResource(id = R.color.Yellow)
@@ -261,15 +269,14 @@ fun HomeContent(
             CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar), modifier = Modifier.clickable {
                 showOutcoming = true
             })
-
             if (showOutcoming) {
                 AlertDialog(
                     onDismissRequest = {
                         // Handle dialog dismissal if needed
-                        showIncoming = false
+                        showOutcoming = false
                     },
                     title = {
-                        Text("Tambah Data Kategori")
+                        Text("Tambah Stok Barang")
                     },
                     text = {
                         val containerColor = colorResource(id = R.color.lavender)
@@ -280,8 +287,8 @@ fun HomeContent(
                                 unfocusedContainerColor = containerColor,
                                 disabledContainerColor = containerColor,
                             ),
-                            label = { Text(text = "Nama Kategori") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            label = { Text(text = "Quantity") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
                             onValueChange = { newInput ->
                                 qty = newInput
@@ -298,7 +305,8 @@ fun HomeContent(
                     confirmButton = {
                         Button(
                             onClick = {
-
+                                val itemsList = listOf(ItemsProduct(fakeIdbarang, qty.toInt()))
+                                viewModel.outgoingTran(fakeIdCustomer, itemsList)
                             },
                             colors = ButtonDefaults.elevatedButtonColors(
                                 containerColor = colorResource(id = R.color.Yellow)
@@ -310,7 +318,7 @@ fun HomeContent(
                     dismissButton = {
                         Button(
                             onClick = {
-                                showIncoming = false
+                                showOutcoming = false
                             },
                             colors = ButtonDefaults.elevatedButtonColors(
                                 containerColor = Color.Black
@@ -321,6 +329,7 @@ fun HomeContent(
                     }
                 )
             }
+
         }
 
         TextItem(
@@ -329,7 +338,19 @@ fun HomeContent(
             fontSize = 24.sp,
         )
 
-        CardLongItem(namaItem = "Gula", pieces = "200", category = "Sembako", id = "15000")
+        LazyColumn(state = rememberLazyListState()){
+            when (transactionState) {
+                is UiState.Success -> {
+                    val transactions = (transactionState as UiState.Success<GetTransactionResponse>).data.data
+                    items(transactions){ tran ->
+                        CardItemTransactions(type = tran.type, nama = tran.partner.name, tipe = tran.partner.type, waktu = tran.createdAt)
+                    }
+                }
+                else -> {}
+            }
+        }
+
+        CardItemTransactions(type = "Keluar", nama = "Romaa", tipe = "Customer", waktu = "2020-11-01T00:00:00.000Z")
     }
 
 

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class GetTransactionResponse(
 
 	@field:SerializedName("data")
-	val data: List<DataItem>,
+	val data: List<DataItemTransaction>,
 
 	@field:SerializedName("success")
 	val success: Boolean
@@ -20,7 +20,7 @@ data class Partner(
 	val type: String
 )
 
-data class DataItem(
+data class DataItemTransaction(
 
     @field:SerializedName("createdAt")
 	val createdAt: String,

@@ -11,6 +11,7 @@ import com.lamz.trackinv.response.product.DeleteProductResponse
 import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.response.product.UpdateProductResponse
+import com.lamz.trackinv.response.transaksi.GetTransactionResponse
 import com.lamz.trackinv.response.transaksi.OutgoingResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -55,7 +56,6 @@ interface ApiService {
         @Path("id") id: String
     ): GetCategoryIdResponse
 
-
     @FormUrlEncoded
     @POST("products")
     suspend fun addProduct(
@@ -89,6 +89,9 @@ interface ApiService {
         @Field("hargaBeli") hargabeli: Int,
         @Field("hargaJual") hargaJual: Int,
     ): UpdateProductResponse
+
+    @GET("transactions")
+    suspend fun getTransaction() : GetTransactionResponse
 
     @POST("transactions/outgoing")
     @Headers("Content-Type: application/json")

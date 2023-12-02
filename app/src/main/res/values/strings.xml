@@ -18,6 +18,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_inventory">Inventory</string>
     <string name="menu_profile">Account</string>
+    <string name="menu_transactions">Transaksi</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="daftar_barang">Daftar Barang</string>
     <string name="tambah_barang">Tambah Barang</string>

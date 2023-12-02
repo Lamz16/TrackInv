@@ -9,10 +9,10 @@ import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun TextItem(
+    modifier: Modifier = Modifier,
     desc: String,
     fontWeight: FontWeight? = null,
     fontSize : TextUnit = TextUnit.Unspecified,
-    modifier: Modifier = Modifier
 ) {
 
     Text(

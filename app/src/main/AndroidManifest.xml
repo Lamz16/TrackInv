@@ -8,17 +8,12 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_app"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_app"
         android:supportsRtl="true"
         android:theme="@style/Theme.TrackInv"
         tools:targetApi="31">
-        <activity
-            android:name=".ui.view.add.AddActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add"
-            android:theme="@style/Theme.TrackInv" />
         <activity
             android:name=".ui.view.welcome.WelcomeActivity"
             android:exported="false"
@@ -28,7 +23,6 @@
             android:name=".ui.view.main.MainActivity"
             android:configChanges="density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.TrackInv">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

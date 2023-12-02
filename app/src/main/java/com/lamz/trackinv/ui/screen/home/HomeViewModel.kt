@@ -12,6 +12,7 @@ import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.product.DataItem
 import com.lamz.trackinv.response.product.GetProductResponse
+import com.lamz.trackinv.response.transaksi.GetTransactionResponse
 import com.lamz.trackinv.response.transaksi.OutgoingResponse
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,18 @@ class HomeViewModel(private val repository: TrackRepository) : ViewModel() {
 
     private val _upload = MutableLiveData<UiState<OutgoingResponse>>()
     val upload: LiveData<UiState<OutgoingResponse>> = _upload
+
+
+    private val _getTransaction = MutableLiveData<UiState<GetTransactionResponse>>()
+    val getTransaction: LiveData<UiState<GetTransactionResponse>> = _getTransaction
+
+    fun getTransaction(){
+        viewModelScope.launch {
+            repository.getTransaction().asFlow().collect{
+                _getTransaction.value = it
+            }
+        }
+    }
 
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()

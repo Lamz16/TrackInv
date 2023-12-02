@@ -54,6 +54,6 @@ fun AccountContent(
 
 @Preview(showBackground = true)
 @Composable
-fun previewAccount(){
+fun PreviewAccount(){
 AccountScreen()
 }
