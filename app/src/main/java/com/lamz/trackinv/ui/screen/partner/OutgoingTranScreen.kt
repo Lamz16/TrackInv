@@ -198,7 +198,7 @@ fun OutGoingContent(
                     showOutgoing = false
                 },
                 title = {
-                    Text("Tambah Stok Barang")
+                    Text("Kurangi Stok Barang")
                 },
                 text = {
                     val containerColor = colorResource(id = R.color.lavender)
