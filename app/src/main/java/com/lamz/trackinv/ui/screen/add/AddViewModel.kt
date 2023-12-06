@@ -8,11 +8,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.membership.MembershipResponse
 import com.lamz.trackinv.response.product.AddProductResponse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -38,6 +40,9 @@ class AddViewModel(private val repository: TrackRepository): ViewModel() {
 
     private val _uploadProduct = MutableLiveData<UiState<AddProductResponse>>()
     val uploadProduct: LiveData<UiState<AddProductResponse>> = _uploadProduct
+
+    private val _uploadMembership = MutableLiveData<UiState<MembershipResponse>>()
+    val uploadMembership: LiveData<UiState<MembershipResponse>> = _uploadMembership
 
     fun addCategory(category : String) {
         viewModelScope.launch {
@@ -67,6 +72,14 @@ class AddViewModel(private val repository: TrackRepository): ViewModel() {
         viewModelScope.launch {
             repository.addProduct(name, stock, category, hargabeli, hargaJual).asFlow().collect(){
                 _uploadProduct.value = it
+            }
+        }
+    }
+
+    fun membership() {
+        viewModelScope.launch {
+            repository.membership().asFlow().collect {
+                _uploadMembership.value = it
             }
         }
     }

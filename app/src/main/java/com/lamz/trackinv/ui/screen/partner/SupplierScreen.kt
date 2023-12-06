@@ -61,6 +61,7 @@ import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.partner.GetSupplierResponse
 import com.lamz.trackinv.ui.component.CardCategoryItem
+import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
@@ -104,15 +105,6 @@ fun SupplierContent(
     val supplierState by viewModel.getSupplier.observeAsState()
     val listState = rememberLazyListState()
 
-    @Composable
-    fun refreshCustomerList() {
-        LaunchedEffect(Unit) {
-            viewModel.getCustomer()
-            listState.animateScrollToItem(index = 0)
-        }
-    }
-
-
     when (uploadState) {
         is UiState.Loading -> {
 
@@ -121,13 +113,13 @@ fun SupplierContent(
         is UiState.Success -> {
             showCategory = false
             Toast.makeText(context, "Berhasil menambah partner", Toast.LENGTH_SHORT).show()
-            refreshCustomerList()
+            navController.navigate(Screen.Supplier.route){
+                    popUpTo(Screen.Home.route)
+            }
         }
 
         is UiState.Error -> {
             Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            refreshCustomerList()
-
         }
 
         else -> {}

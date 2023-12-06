@@ -12,6 +12,7 @@ import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.membership.MembershipResponse
 import com.lamz.trackinv.response.partner.AddPartnerResponse
 import com.lamz.trackinv.response.partner.GetCustomerByidResponse
 import com.lamz.trackinv.response.partner.GetCustomerResponse
@@ -379,6 +380,23 @@ class TrackRepository private constructor(
             emit(UiState.Error("Error : ${e.message.toString()}"))
         }
 
+    }
+
+    suspend fun membership() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.membership()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, MembershipResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
     }
 
     companion object {

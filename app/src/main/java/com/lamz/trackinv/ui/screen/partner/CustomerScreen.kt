@@ -69,7 +69,7 @@ fun CustomerScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
-    ) {
+) {
 
     Box(
         contentAlignment = Alignment.TopCenter,
@@ -77,7 +77,7 @@ fun CustomerScreen(
             .fillMaxSize()
 
     ) {
-        CustomerContent(navController = navController , navigateToDetail = navigateToDetail)
+        CustomerContent(navController = navController, navigateToDetail = navigateToDetail)
 
     }
 
@@ -106,14 +106,6 @@ fun CustomerContent(
     val customerState by viewModel.getCustomer.observeAsState()
     val listState = rememberLazyListState()
 
-    @Composable
-    fun refreshCustomerList() {
-        LaunchedEffect(Unit) {
-            viewModel.getCustomer()
-            listState.animateScrollToItem(index = 0)
-        }
-    }
-
     when (uploadState) {
         is UiState.Loading -> {
 
@@ -122,12 +114,13 @@ fun CustomerContent(
         is UiState.Success -> {
             showCategory = false
             Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            refreshCustomerList()
+            navController.navigate(Screen.Customer.route) {
+                popUpTo(Screen.Home.route)
+            }
         }
 
         is UiState.Error -> {
             Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            refreshCustomerList()
         }
 
         else -> {}

@@ -2,6 +2,7 @@ package com.lamz.trackinv.ui.screen.add
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
@@ -60,6 +61,7 @@ import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.ui.component.CardCategoryItem
+import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
@@ -75,8 +77,10 @@ fun AddScreen(
             .fillMaxSize()
 
     ) {
-        AddContent(navigateToDetail = navigateToDetail,
-            navController = navController)
+        AddContent(
+            navigateToDetail = navigateToDetail,
+            navController = navController
+        )
     }
 
 }
@@ -94,6 +98,7 @@ fun AddContent(
     navController: NavHostController,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var showMembership by remember { mutableStateOf(false) }
     var showCategory by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
@@ -101,16 +106,11 @@ fun AddContent(
 
 
     val uploadState by viewModel.upload.observeAsState()
+    val uploadMembership by viewModel.uploadMembership.observeAsState()
     val categoryState by viewModel.getCategory.observeAsState()
     val listState = rememberLazyListState()
 
-    @Composable
-    fun refreshCategoryList() {
-        LaunchedEffect(Unit) {
-            viewModel.getCategory()
-            listState.animateScrollToItem(index = 0)
-        }
-    }
+
 
     // Menanggapi perubahan nilai upload
     when (uploadState) {
@@ -121,12 +121,38 @@ fun AddContent(
         is UiState.Success -> {
             showCategory = false
             Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            refreshCategoryList()
+            navController.navigate(Screen.Add.route){
+                popUpTo(Screen.Home.route)
+            }
         }
 
         is UiState.Error -> {
             Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            refreshCategoryList()
+            showMembership = true
+        }
+
+        else -> {}
+    }
+
+
+    when (val state = uploadMembership) {
+        is UiState.Loading -> {
+
+        }
+
+        is UiState.Success -> {
+            showCategory = false
+            val redirectUrl = state.data.data.redirectUrl
+            showMembership = false
+            LaunchedEffect(true) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
+                context.startActivity(intent)
+                (context as? ComponentActivity)?.finish()
+            }
+        }
+
+        is UiState.Error -> {
+            Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
         }
 
         else -> {}
@@ -294,6 +320,44 @@ fun AddContent(
                 }
             )
         }
+        if (showMembership) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Handle dialog dismissal if needed
+                    showMembership = false
+                },
+                title = {
+                    Text("Menjadi Membership")
+                },
+                text = {
+                    Text("Ingin mendapat lebih banyak limit?")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.membership()
+                        },
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = colorResource(id = R.color.Yellow)
+                        )
+                    ) {
+                        Text("Yes")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showMembership = false
+                        },
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Color.Black
+                        )
+                    ) {
+                        Text("No")
+                    }
+                }
+            )
+        }
 
         LazyColumn(
             state = listState, contentPadding = PaddingValues(bottom = 120.dp),
@@ -342,8 +406,7 @@ fun AddContent(
 
                 else -> {}
             }
-
-
         }
     }
 }
+

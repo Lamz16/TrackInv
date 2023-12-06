@@ -6,6 +6,7 @@ import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.membership.MembershipResponse
 import com.lamz.trackinv.response.partner.AddPartnerResponse
 import com.lamz.trackinv.response.partner.GetCustomerByidResponse
 import com.lamz.trackinv.response.partner.GetCustomerResponse
@@ -140,5 +141,9 @@ interface ApiService {
     suspend fun getAllSupplier(
         @Path("id") id: String
     ): GetSupplierByidResponse
+
+    @POST("membership/payment")
+    suspend fun membership(
+    ): MembershipResponse
 
 }
