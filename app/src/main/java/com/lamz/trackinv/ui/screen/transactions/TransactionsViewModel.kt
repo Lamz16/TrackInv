@@ -1,5 +1,8 @@
 package com.lamz.trackinv.ui.screen.transactions
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,8 +18,7 @@ import kotlinx.coroutines.launch
 
 class TransactionsViewModel(val repository: TrackRepository) : ViewModel() {
 
-    private val _upload = MutableLiveData<UiState<OutgoingResponse>>()
-    val upload: LiveData<UiState<OutgoingResponse>> = _upload
+
 
 
     private val _getTransaction = MutableLiveData<UiState<GetTransactionResponse>>()
@@ -30,19 +32,7 @@ class TransactionsViewModel(val repository: TrackRepository) : ViewModel() {
         }
     }
 
-    fun outgoingTran(partnerId : String, items : List<ItemsProduct>) {
-        viewModelScope.launch {
-            repository.outgoingTran(partnerId, items).asFlow().collect {
-                _upload.value = it
-            }
-        }
-    }
 
-    fun incomingTran(partnerId : String, items : List<ItemsProduct>) {
-        viewModelScope.launch {
-            repository.incomingTran(partnerId, items).asFlow().collect {
-                _upload.value = it
-            }
-        }
-    }
+
+
 }

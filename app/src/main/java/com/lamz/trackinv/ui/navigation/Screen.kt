@@ -3,7 +3,15 @@ package com.lamz.trackinv.ui.navigation
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Inventory : Screen("inventory")
-    object Profile : Screen("profile")
+    object Customer : Screen("customer")
+    object Out : Screen("customer/{idCustomer}"){
+        fun createRoute(idCustomer: String) = "customer/$idCustomer"
+    }
+
+    object Supplier : Screen("supplier")
+    object In : Screen("supplier/{idSupplier}"){
+        fun createRoute(idSupplier: String) = "supplier/$idSupplier"
+    }
     object Transactions : Screen("transactions")
     object Login : Screen("login")
     object Add : Screen("Add")

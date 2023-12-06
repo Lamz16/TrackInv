@@ -118,6 +118,7 @@ fun LoginContent(
             viewModel.saveSession(
                 UserModel(
                     uiState.data.dataLoginPost.user.email,
+                    uiState.data.dataLoginPost.user.username,
                     uiState.data.dataLoginPost.token,
                     uiState.data.dataLoginPost.user.namaToko,
                     true
@@ -269,11 +270,9 @@ fun LoginContent(
                     Button(
                         onClick = {
                             showDialog = false
-                            val intent = Intent(context, MainActivity::class.java)
-                            intent.flags =
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                            context.startActivity(intent)
-                            (context as? ComponentActivity)?.finish()
+                            navController.navigate(Screen.Home.route){
+                                popUpTo(0)
+                            }
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)

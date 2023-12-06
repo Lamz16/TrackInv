@@ -24,4 +24,6 @@
     <string name="tambah_barang">Tambah Barang</string>
     <string name="kategori">Kategori</string>
     <string name="title_activity_add">AddActivity</string>
+    <string name="pilih_customer">Pilih customer</string>
+    <string name="pilih_supplier">Pilih supplier</string>
 </resources>

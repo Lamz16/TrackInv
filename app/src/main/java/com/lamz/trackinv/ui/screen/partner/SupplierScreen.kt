@@ -1,4 +1,4 @@
-package com.lamz.trackinv.ui.screen.add
+package com.lamz.trackinv.ui.screen.partner
 
 import android.content.Context
 import android.content.Intent
@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,8 +44,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,61 +59,60 @@ import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.response.partner.GetSupplierResponse
 import com.lamz.trackinv.ui.component.CardCategoryItem
 import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
-fun AddScreen(
+fun SupplierScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
+) {
 
-    ) {
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = modifier
             .fillMaxSize()
 
     ) {
-        AddContent(navigateToDetail = navigateToDetail,
-            navController = navController)
+        SupplierContent(navController = navController, navigateToDetail = navigateToDetail)
     }
 
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddContent(
+fun SupplierContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: AddViewModel = viewModel(
+    viewModel: PartnerViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
-    navigateToDetail: (String) -> Unit,
     navController: NavHostController,
+    navigateToDetail: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showCategory by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
+    var addSupplier by remember { mutableStateOf("") }
 
 
-    val uploadState by viewModel.upload.observeAsState()
-    val categoryState by viewModel.getCategory.observeAsState()
+    val uploadState by viewModel.uploadSupplier.observeAsState()
+    val supplierState by viewModel.getSupplier.observeAsState()
     val listState = rememberLazyListState()
 
     @Composable
-    fun refreshCategoryList() {
+    fun refreshCustomerList() {
         LaunchedEffect(Unit) {
-            viewModel.getCategory()
+            viewModel.getCustomer()
             listState.animateScrollToItem(index = 0)
         }
     }
 
-    // Menanggapi perubahan nilai upload
+
     when (uploadState) {
         is UiState.Loading -> {
 
@@ -120,20 +120,21 @@ fun AddContent(
 
         is UiState.Success -> {
             showCategory = false
-            Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            refreshCategoryList()
+            Toast.makeText(context, "Berhasil menambah partner", Toast.LENGTH_SHORT).show()
+            refreshCustomerList()
         }
 
         is UiState.Error -> {
             Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            refreshCategoryList()
+            refreshCustomerList()
+
         }
 
         else -> {}
     }
 
     LaunchedEffect(true) {
-        viewModel.getCategory()
+        viewModel.getSupplier()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -144,7 +145,7 @@ fun AddContent(
         TopAppBar(
             title = {
                 Text(
-                    stringResource(id = R.string.kategori),
+                    stringResource(id = R.string.pilih_supplier),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp,
                 )
@@ -163,8 +164,8 @@ fun AddContent(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Category,
-                            contentDescription = "Cancel",
+                            bitmap = ImageBitmap.imageResource(id = R.drawable.ic_partner),
+                            contentDescription = "Add partner",
                             tint = colorResource(id = R.color.Yellow),
                             modifier = Modifier
                                 .size(36.dp)
@@ -197,22 +198,22 @@ fun AddContent(
                     showCategory = false
                 },
                 title = {
-                    Text("Tambah Data Kategori")
+                    Text("Tambahkan partner")
                 },
                 text = {
                     val containerColor = colorResource(id = R.color.lavender)
                     OutlinedTextField(
-                        value = viewModel.addCategory,
+                        value = addSupplier,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = containerColor,
                             unfocusedContainerColor = containerColor,
                             disabledContainerColor = containerColor,
                         ),
-                        label = { Text(text = "Nama Kategori") },
+                        label = { Text(text = "Nama Partner") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         singleLine = true,
                         onValueChange = { newInput ->
-                            viewModel.addCategory = newInput
+                            addSupplier = newInput
                         },
                         shape = RoundedCornerShape(size = 20.dp),
                         modifier = Modifier
@@ -226,7 +227,7 @@ fun AddContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.addCategory(viewModel.addCategory)
+                            viewModel.addSupplier(addSupplier)
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)
@@ -302,21 +303,21 @@ fun AddContent(
             // Observe the LiveData for category data
 
 
-            when (categoryState) {
+            when (supplierState) {
                 is UiState.Loading -> {
                     // Display loading indicator if needed
                 }
 
                 is UiState.Success -> {
                     val categories =
-                        (categoryState as UiState.Success<GetAllCategoryResponse>).data.data
+                        (supplierState as UiState.Success<GetSupplierResponse>).data.data
 
                     // Display each category in LazyColumn
-                    items(categories) { category ->
+                    items(categories) { supplier ->
                         CardCategoryItem(
-                            nameCategory = category.name,
+                            nameCategory = supplier.name,
                             modifier = Modifier.clickable {
-                                navigateToDetail(category.id)
+                                navigateToDetail(supplier.id)
                             })
                     }
 
@@ -329,7 +330,7 @@ fun AddContent(
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("Data kategori masih kosong. Tambahkan dulu.")
+                                Text("Data partner masih kosong. Tambahkan dulu.")
                             }
                         }
                     }

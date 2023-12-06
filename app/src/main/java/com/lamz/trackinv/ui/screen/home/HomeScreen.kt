@@ -12,16 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,8 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -42,14 +36,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.transaksi.GetTransactionResponse
@@ -57,11 +50,14 @@ import com.lamz.trackinv.ui.component.CardItem1
 import com.lamz.trackinv.ui.component.CardItem2
 import com.lamz.trackinv.ui.component.CardItemTransactions
 import com.lamz.trackinv.ui.component.TextItem
+import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
-fun HomeScreen() {
-    HomeContent()
+fun HomeScreen(
+    navController: NavHostController
+) {
+    HomeContent(navController = navController)
 }
 
 
@@ -72,18 +68,14 @@ fun HomeContent(
     viewModel: HomeViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository(context))
     ),
+    navController: NavHostController,
 ) {
 
     val sessionData by viewModel.getSession().observeAsState()
 
     var showDialog by remember { mutableStateOf(false) }
-    var showIncoming by remember { mutableStateOf(false) }
-    var showOutcoming by remember { mutableStateOf(false) }
-    var qty by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
-    val fakeIdbarang = "8fdaf6cf-f6d6-446f-9000-e51937994c23"
-    val fakeIdCustomer = "afc9a85d-fe69-4f30-a95d-1af879795754"
     val wasFocused = remember { isFocused }
     val uploadState by viewModel.upload.observeAsState()
     val transactionState by viewModel.getTransaction.observeAsState()
@@ -202,133 +194,14 @@ fun HomeContent(
             horizontalArrangement = Arrangement.Center
         ) {
             CardItem2(R.drawable.ic_stok_masuk, stringResource(id = R.string.stok_masuk), modifier = Modifier.clickable {
-                showIncoming = true
+                navController.navigate(Screen.Supplier.route)
             })
 
-            if (showIncoming) {
-                AlertDialog(
-                    onDismissRequest = {
-                        // Handle dialog dismissal if needed
-                        showIncoming = false
-                    },
-                    title = {
-                        Text("Tambah Stok Barang")
-                    },
-                    text = {
-                        val containerColor = colorResource(id = R.color.lavender)
-                        OutlinedTextField(
-                            value = qty,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = containerColor,
-                                unfocusedContainerColor = containerColor,
-                                disabledContainerColor = containerColor,
-                            ),
-                            label = { Text(text = "Quantity") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
-                            onValueChange = { newInput ->
-                                qty = newInput
-                            },
-                            shape = RoundedCornerShape(size = 20.dp),
-                            modifier = Modifier
-                                .padding(bottom = 24.dp)
-                                .focusRequester(focusRequester)
-                                .onFocusChanged {
-                                    isFocused = it.isFocused
-                                },
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                val itemsList = listOf(ItemsProduct(fakeIdbarang, qty.toInt()))
-                                viewModel.incomingTran(fakeIdCustomer, itemsList)
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = colorResource(id = R.color.Yellow)
-                            )
-                        ) {
-                            Text("Yes")
-                        }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = {
-                                showIncoming = false
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = Color.Black
-                            )
-                        ) {
-                            Text("No")
-                        }
-                    }
-                )
-            }
 
             CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar), modifier = Modifier.clickable {
-                showOutcoming = true
+                navController.navigate(Screen.Customer.route)
             })
-            if (showOutcoming) {
-                AlertDialog(
-                    onDismissRequest = {
-                        // Handle dialog dismissal if needed
-                        showOutcoming = false
-                    },
-                    title = {
-                        Text("Tambah Stok Barang")
-                    },
-                    text = {
-                        val containerColor = colorResource(id = R.color.lavender)
-                        OutlinedTextField(
-                            value = qty,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = containerColor,
-                                unfocusedContainerColor = containerColor,
-                                disabledContainerColor = containerColor,
-                            ),
-                            label = { Text(text = "Quantity") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
-                            onValueChange = { newInput ->
-                                qty = newInput
-                            },
-                            shape = RoundedCornerShape(size = 20.dp),
-                            modifier = Modifier
-                                .padding(bottom = 24.dp)
-                                .focusRequester(focusRequester)
-                                .onFocusChanged {
-                                    isFocused = it.isFocused
-                                },
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                val itemsList = listOf(ItemsProduct(fakeIdbarang, qty.toInt()))
-                                viewModel.outgoingTran(fakeIdCustomer, itemsList)
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = colorResource(id = R.color.Yellow)
-                            )
-                        ) {
-                            Text("Yes")
-                        }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = {
-                                showOutcoming = false
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = Color.Black
-                            )
-                        ) {
-                            Text("No")
-                        }
-                    }
-                )
-            }
+
 
         }
 
@@ -349,8 +222,6 @@ fun HomeContent(
                 else -> {}
             }
         }
-
-        CardItemTransactions(type = "Keluar", nama = "Romaa", tipe = "Customer", waktu = "2020-11-01T00:00:00.000Z")
     }
 
 
@@ -360,5 +231,5 @@ fun HomeContent(
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-    HomeContent()
+
 }

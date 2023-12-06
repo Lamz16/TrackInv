@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.ui.screen.account.AccountViewModel
+import com.lamz.trackinv.ui.screen.partner.PartnerViewModel
 import com.lamz.trackinv.ui.screen.add.AddViewModel
 import com.lamz.trackinv.ui.screen.home.HomeViewModel
 import com.lamz.trackinv.ui.screen.inventory.InventoryViewModel
@@ -38,8 +38,8 @@ class ViewModelFactory(private val repository: TrackRepository) : ViewModelProvi
             modelClass.isAssignableFrom(AddViewModel::class.java) -> {
                 AddViewModel(repository) as T
             }
-            modelClass.isAssignableFrom(AccountViewModel::class.java) -> {
-                AccountViewModel(repository) as T
+            modelClass.isAssignableFrom(PartnerViewModel::class.java) -> {
+                PartnerViewModel(repository) as T
             }
             modelClass.isAssignableFrom(InvDetailViewModel::class.java) -> {
                 InvDetailViewModel(repository) as T

@@ -12,6 +12,11 @@ import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.partner.AddPartnerResponse
+import com.lamz.trackinv.response.partner.GetCustomerByidResponse
+import com.lamz.trackinv.response.partner.GetCustomerResponse
+import com.lamz.trackinv.response.partner.GetSupplierByidResponse
+import com.lamz.trackinv.response.partner.GetSupplierResponse
 import com.lamz.trackinv.response.product.AddProductResponse
 import com.lamz.trackinv.response.product.DeleteProductResponse
 import com.lamz.trackinv.response.product.GetProductByIdResponse
@@ -264,6 +269,116 @@ class TrackRepository private constructor(
         } catch (e: Exception) {
             emit(UiState.Error("Error : ${e.message.toString()}"))
         }
+    }
+
+
+    suspend fun getCustomer() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllCustomer()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetCustomerResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun addCustomer(name : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.addCustomer(name)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, AddPartnerResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getCustomer(id : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllCustomer(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetCustomerByidResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+
+    suspend fun getSupplier() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllSupplier()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetSupplierResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun addSupplier(name : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.addSupplier(name)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, AddPartnerResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun getSupplier(id: String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.getAllSupplier(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetSupplierByidResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
     }
 
     companion object {

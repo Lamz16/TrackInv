@@ -1,17 +1,20 @@
-package com.lamz.trackinv.response.customer
+package com.lamz.trackinv.response.partner
 
 import com.google.gson.annotations.SerializedName
 
-data class CustomerResponse(
+data class GetSupplierResponse(
 
 	@field:SerializedName("data")
-	val data: List<DataItem>,
+	val data: List<DataItemSupplier>,
 
 	@field:SerializedName("success")
 	val success: Boolean
 )
 
-data class DataItem(
+data class DataItemSupplier(
+
+	@field:SerializedName("createdAt")
+	val createdAt: String,
 
 	@field:SerializedName("name")
 	val name: String,
@@ -23,5 +26,8 @@ data class DataItem(
 	val type: String,
 
 	@field:SerializedName("userId")
-	val userId: String
+	val userId: String,
+
+	@field:SerializedName("updatedAt")
+	val updatedAt: String
 )

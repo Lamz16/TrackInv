@@ -6,6 +6,11 @@ import com.lamz.trackinv.response.auth.RegisterResponse
 import com.lamz.trackinv.response.category.AddCategoryResponse
 import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
+import com.lamz.trackinv.response.partner.AddPartnerResponse
+import com.lamz.trackinv.response.partner.GetCustomerByidResponse
+import com.lamz.trackinv.response.partner.GetCustomerResponse
+import com.lamz.trackinv.response.partner.GetSupplierByidResponse
+import com.lamz.trackinv.response.partner.GetSupplierResponse
 import com.lamz.trackinv.response.product.AddProductResponse
 import com.lamz.trackinv.response.product.DeleteProductResponse
 import com.lamz.trackinv.response.product.GetProductByIdResponse
@@ -106,5 +111,34 @@ interface ApiService {
         @Query("partnerId") partnerId: String,
         @Body items: OutGoing
     ): OutgoingResponse
+
+    @FormUrlEncoded
+    @POST("customers")
+    suspend fun addCustomer(
+        @Field("name") name : String
+    ) : AddPartnerResponse
+
+    @FormUrlEncoded
+    @POST("supliers")
+    suspend fun addSupplier(
+        @Field("name") name : String
+    ) : AddPartnerResponse
+
+    @GET("customers")
+    suspend fun getAllCustomer(): GetCustomerResponse
+
+    @GET("customers/{id}")
+    suspend fun getAllCustomer(
+        @Path("id") id: String
+    ): GetCustomerByidResponse
+
+    @GET("supliers")
+    suspend fun getAllSupplier(): GetSupplierResponse
+
+
+    @GET("supliers/{id}")
+    suspend fun getAllSupplier(
+        @Path("id") id: String
+    ): GetSupplierByidResponse
 
 }
