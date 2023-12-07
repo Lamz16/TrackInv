@@ -27,7 +27,6 @@
         <activity
             android:name=".ui.view.main.SplashScreen"
             android:exported="true"
-            android:label="@string/title_activity_splash_screen"
             android:theme="@style/Theme.TrackInv">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
