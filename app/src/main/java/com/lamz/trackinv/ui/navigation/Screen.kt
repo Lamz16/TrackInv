@@ -1,6 +1,7 @@
 package com.lamz.trackinv.ui.navigation
 
 sealed class Screen(val route: String) {
+    object Splash: Screen("splash")
     object Home : Screen("home")
     object Inventory : Screen("inventory")
     object Customer : Screen("customer")

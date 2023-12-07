@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -15,14 +15,19 @@
         android:theme="@style/Theme.TrackInv"
         tools:targetApi="31">
         <activity
+            android:name=".ui.view.main.MainActivity"
+            android:exported="false"
+            android:configChanges="density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
+            android:theme="@style/Theme.TrackInv" />
+        <activity
             android:name=".ui.view.welcome.WelcomeActivity"
             android:exported="false"
             android:label="@string/title_activity_welcome"
             android:theme="@style/Theme.TrackInv" />
         <activity
-            android:name=".ui.view.main.MainActivity"
-            android:configChanges="density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
+            android:name=".ui.view.main.SplashScreen"
             android:exported="true"
+            android:label="@string/title_activity_splash_screen"
             android:theme="@style/Theme.TrackInv">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

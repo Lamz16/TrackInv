@@ -26,4 +26,5 @@
     <string name="title_activity_add">AddActivity</string>
     <string name="pilih_customer">Pilih customer</string>
     <string name="pilih_supplier">Pilih supplier</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
 </resources>
