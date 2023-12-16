@@ -1,7 +1,6 @@
 package com.lamz.trackinv.ui.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ModeEdit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -63,25 +60,10 @@ fun CardCategoryItem(
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Image(
-                    imageVector = Icons.Default.Delete, contentDescription = null,
-                    colorFilter = ColorFilter.tint(Color.Red),
-                    modifier = modifier
-                        .padding(start = 8.dp)
-                        .clickable {}
-                )
-                Image(
-                    imageVector = Icons.Default.ModeEdit, contentDescription = null,
-                    colorFilter = ColorFilter.tint(Color.Blue),
-                    modifier = modifier
-                        .padding(start = 8.dp)
-                        .clickable {  }
-                )
-                Image(
                     imageVector = Icons.Default.ArrowForwardIos, contentDescription = null,
                     colorFilter = ColorFilter.tint(Color.Black),
                     modifier = modifier
                         .padding(start = 8.dp)
-                        .clickable {  }
                 )
             }
 
