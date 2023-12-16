@@ -5,15 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,6 +34,7 @@ import java.util.Calendar
 fun CardItemTransactions(
     type : String,
     nama : String,
+    harga : String,
     tipe : String,
     waktu : String,
     modifier: Modifier = Modifier,
@@ -42,10 +45,16 @@ fun CardItemTransactions(
     val month = calendar.get(Calendar.MONTH) + 1
     val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
 
+    val hargaColor = when (type) {
+        "masuk" -> colorResource(id = R.color.red) // Warna merah untuk transaksi masuk
+        "keluar" -> colorResource(id = R.color.green) // Warna hijau untuk transaksi keluar
+        else -> Color.Black // Warna default jika tipe tidak cocok
+    }
+
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
-        .size(100.dp)
+        .wrapContentSize()
         .clip(RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(id = R.color.lavender)
@@ -74,8 +83,20 @@ fun CardItemTransactions(
                 fontWeight = FontWeight.Bold,
                 color = Color.Blue,
                 modifier = modifier
-                    .padding(top = 10.dp)
+                    .align(Alignment.CenterVertically)
             )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = harga,
+                fontSize = 15.sp,
+                fontStyle = FontStyle.Normal,
+                fontWeight = FontWeight.Bold,
+                color = hargaColor,
+                modifier = modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 10.dp)
+            )
+
         }
         Divider(
             thickness = 1.dp, color = Color.Black
@@ -104,5 +125,5 @@ fun CardItemTransactions(
 @Preview(showBackground = true)
 @Composable
 fun CardtransactionsPreview(){
-    CardItemTransactions("Keluar","John Doe","customer","2020-11-01T00:00:00.000Z")
+    CardItemTransactions("Keluar","John Doe","9000","customer","2020-11-01T00:00:00.000Z")
 }

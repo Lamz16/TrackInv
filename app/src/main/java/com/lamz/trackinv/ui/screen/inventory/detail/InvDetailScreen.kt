@@ -1,9 +1,6 @@
 package com.lamz.trackinv.ui.screen.inventory.detail
 
 import android.content.Context
-import android.content.Intent
-import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +49,6 @@ import com.lamz.trackinv.response.product.GetProductByIdResponse
 import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
-import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
 fun InvDetailScreen(
@@ -183,7 +179,7 @@ fun InvDetailContent(
                         viewModel.updateProduct(
                             inventoryId,
                             editedNamaBarang,
-                            editedstokBarang.toString(),
+                            editedstokBarang,
                             viewModel.categoryId,
                             editedhargaBeli.toInt(),
                             editedhargaJual.toInt()
@@ -209,7 +205,7 @@ fun InvDetailContent(
     TopAppBar(
         title = {
             Text(
-                stringResource(id = R.string.kategori),
+                stringResource(id = R.string.tambah_barang),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 24.sp,
             )

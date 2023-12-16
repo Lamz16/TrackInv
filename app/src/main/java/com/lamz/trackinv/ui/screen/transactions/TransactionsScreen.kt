@@ -117,6 +117,7 @@ fun TransactionsContent(
                         CardItemTransactions(
                             nama = transactions.partner.name,
                             waktu = transactions.createdAt,
+                            harga = transactions.totalHarga.toString(),
                             type = transactions.type,
                             tipe = transactions.partner.type
                         )

@@ -211,17 +211,26 @@ fun HomeContent(
             fontSize = 24.sp,
         )
 
-        LazyColumn(state = rememberLazyListState()){
+        LazyColumn(state = rememberLazyListState()) {
             when (transactionState) {
                 is UiState.Success -> {
                     val transactions = (transactionState as UiState.Success<GetTransactionResponse>).data.data
-                    items(transactions){ tran ->
-                        CardItemTransactions(type = tran.type, nama = tran.partner.name, tipe = tran.partner.type, waktu = tran.createdAt)
+                        .sortedByDescending { it.createdAt } // Urutkan berdasarkan waktu transaksi secara descending
+
+                    items(transactions.reversed()) { tran ->
+                        CardItemTransactions(
+                            type = tran.type,
+                            nama = tran.partner.name,
+                            tipe = tran.partner.type,
+                            waktu = tran.createdAt,
+                            harga = tran.totalHarga.toString()
+                        )
                     }
                 }
                 else -> {}
             }
         }
+
     }
 
 

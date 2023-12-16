@@ -44,6 +44,7 @@ fun TrackInvApp(
                 currentRoute != Screen.AddProduct.route &&
                 currentRoute != Screen.Membership.route &&
                 currentRoute != Screen.Customer.route &&
+                currentRoute != Screen.In.route &&
                 currentRoute != Screen.Supplier.route &&
                 currentRoute != Screen.Out.route
             ) {
