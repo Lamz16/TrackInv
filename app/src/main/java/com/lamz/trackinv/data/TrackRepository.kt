@@ -148,6 +148,41 @@ class TrackRepository private constructor(
 
     }
 
+    suspend fun updateCategory( id: String, name: String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.updateCategory(id,name)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+
+    }
+
+    suspend fun deleteCategory(id : String) = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.deleteCategories(id)
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
     suspend fun getProduct() = liveData {
         emit(UiState.Loading)
         try {
@@ -389,6 +424,23 @@ class TrackRepository private constructor(
             val user = runBlocking { userPreference.getSession().first() }
             val apiService = ApiConfig.getApiService(user.token)
             val successResponse = apiService.membership()
+            emit(UiState.Success(successResponse))
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, MembershipResponse::class.java)
+            emit(UiState.Error(errorResponse.toString()))
+        } catch (e: Exception) {
+            emit(UiState.Error("Error : ${e.message.toString()}"))
+        }
+    }
+
+    suspend fun membershipTahun() = liveData {
+        emit(UiState.Loading)
+        try {
+            userPreference.getSession()
+            val user = runBlocking { userPreference.getSession().first() }
+            val apiService = ApiConfig.getApiService(user.token)
+            val successResponse = apiService.membershipTahun()
             emit(UiState.Success(successResponse))
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()

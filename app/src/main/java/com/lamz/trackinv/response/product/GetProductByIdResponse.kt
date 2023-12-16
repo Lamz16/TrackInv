@@ -13,7 +13,7 @@ data class GetProductByIdResponse(
     @field:SerializedName("hargaJual")
 	val hargaJual: Int,
 
-    @field:SerializedName("stok")
+    @field:SerializedName("stock")
 	val stok: Int,
 
     @field:SerializedName("category")

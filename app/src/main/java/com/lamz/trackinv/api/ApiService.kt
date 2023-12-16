@@ -63,6 +63,18 @@ interface ApiService {
     ): GetCategoryIdResponse
 
     @FormUrlEncoded
+    @PUT("categories/{id}")
+    suspend fun updateCategory(
+        @Path("id") id : String,
+        @Field("name") name: String,
+    ): GetCategoryIdResponse
+
+    @DELETE("categories/{id}")
+    suspend fun deleteCategories(
+        @Path("id") id: String
+    ): GetCategoryIdResponse
+
+    @FormUrlEncoded
     @POST("products")
     suspend fun addProduct(
         @Field("name") name : String,
@@ -142,8 +154,12 @@ interface ApiService {
         @Path("id") id: String
     ): GetSupplierByidResponse
 
-    @POST("membership/payment")
+    @POST("membership/payment?time=1m")
     suspend fun membership(
+    ): MembershipResponse
+
+    @POST("membership/payment?time=1y")
+    suspend fun membershipTahun(
     ): MembershipResponse
 
 }

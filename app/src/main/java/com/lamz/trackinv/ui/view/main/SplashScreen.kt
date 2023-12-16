@@ -17,12 +17,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.ui.view.main.ui.theme.TrackInvTheme
 import kotlinx.coroutines.delay
@@ -32,6 +34,21 @@ class SplashScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val systemUiController = rememberSystemUiController()
+            val colors = colorResource(id = R.color.black)
+            val colorsYellow = colorResource(id = R.color.Yellow)
+            SideEffect {
+
+                systemUiController.setSystemBarsColor(
+                    color = colorsYellow,
+                    darkIcons = true
+                )
+
+                systemUiController.setNavigationBarColor(
+                    color = colors,
+                    darkIcons = false
+                )
+            }
             TrackInvTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

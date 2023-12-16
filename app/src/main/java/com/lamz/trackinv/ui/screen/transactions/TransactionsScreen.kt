@@ -89,6 +89,7 @@ fun TransactionsContent(
                 filteredProducts = if (query.text.isNotEmpty()) {
                     allProducts.filter {
                         it.partner.name.contains(query.text, ignoreCase = true)
+                        it.partner.type.contains(query.text, ignoreCase = true)
                     }
                 } else {
                     allProducts

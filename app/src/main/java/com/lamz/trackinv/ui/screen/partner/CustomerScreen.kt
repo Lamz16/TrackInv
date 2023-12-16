@@ -294,9 +294,6 @@ fun CustomerContent(
             state = listState, contentPadding = PaddingValues(bottom = 120.dp),
             modifier = Modifier.padding(top = 48.dp)
         ) {
-            // Observe the LiveData for category data
-
-
             when (customerState) {
                 is UiState.Loading -> {
                     // Display loading indicator if needed

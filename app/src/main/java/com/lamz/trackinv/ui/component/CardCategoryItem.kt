@@ -1,14 +1,17 @@
 package com.lamz.trackinv.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ModeEdit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
@@ -34,7 +38,7 @@ fun CardCategoryItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .size(50.dp)
+            .wrapContentSize()
             .clip(RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(id = R.color.lavender)
@@ -50,18 +54,42 @@ fun CardCategoryItem(
                 fontSize = 15.sp,
                 fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.Bold,
-                color = Color.Blue,
+                color = Color.Black,
                 modifier = modifier
-                    .padding(top = 10.dp)
+                    .align(Alignment.CenterVertically)
             )
 
-            Image(
-                imageVector = Icons.Default.ArrowForwardIos, contentDescription = null,
-                alignment = Alignment.CenterEnd,
-                colorFilter = ColorFilter.tint(Color.Blue),
-                modifier = modifier
-                    .padding(top = 10.dp, start = 10.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Image(
+                    imageVector = Icons.Default.Delete, contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color.Red),
+                    modifier = modifier
+                        .padding(start = 8.dp)
+                        .clickable {}
+                )
+                Image(
+                    imageVector = Icons.Default.ModeEdit, contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color.Blue),
+                    modifier = modifier
+                        .padding(start = 8.dp)
+                        .clickable {  }
+                )
+                Image(
+                    imageVector = Icons.Default.ArrowForwardIos, contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color.Black),
+                    modifier = modifier
+                        .padding(start = 8.dp)
+                        .clickable {  }
+                )
+            }
+
         }
     }
+}
+@Preview(showBackground = true)
+@Composable
+private fun previewCard(){
+    CardCategoryItem(nameCategory = "Sembako")
 }

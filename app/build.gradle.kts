@@ -101,6 +101,6 @@ dependencies {
 
     implementation ("androidx.core:core-splashscreen:1.0.1")
 
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }

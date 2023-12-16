@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.TrackRepository
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.response.category.AddCategoryResponse
@@ -16,7 +15,6 @@ import com.lamz.trackinv.response.category.GetAllCategoryResponse
 import com.lamz.trackinv.response.category.GetCategoryIdResponse
 import com.lamz.trackinv.response.membership.MembershipResponse
 import com.lamz.trackinv.response.product.AddProductResponse
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class AddViewModel(private val repository: TrackRepository): ViewModel() {
@@ -37,6 +35,12 @@ class AddViewModel(private val repository: TrackRepository): ViewModel() {
 
     private val _getCategoryId = MutableLiveData<UiState<GetCategoryIdResponse>>()
     val getCategoryId: LiveData<UiState<GetCategoryIdResponse>> = _getCategoryId
+
+    private val _delete= MutableLiveData<UiState<GetCategoryIdResponse>>()
+    val delete: LiveData<UiState<GetCategoryIdResponse>> = _delete
+
+    private val _updateCategory = MutableLiveData<UiState<GetCategoryIdResponse>>()
+    val updateCategory: LiveData<UiState<GetCategoryIdResponse>> = _updateCategory
 
     private val _uploadProduct = MutableLiveData<UiState<AddProductResponse>>()
     val uploadProduct: LiveData<UiState<AddProductResponse>> = _uploadProduct
@@ -68,6 +72,22 @@ class AddViewModel(private val repository: TrackRepository): ViewModel() {
         }
     }
 
+    fun editCategory( id : String, name : String){
+        viewModelScope.launch {
+            repository.updateCategory(id, name).asFlow().collect(){
+                _updateCategory.value = it
+            }
+        }
+    }
+
+    fun deleteCategory( id : String){
+        viewModelScope.launch {
+            repository.deleteCategory(id).asFlow().collect(){
+                _delete.value = it
+            }
+        }
+    }
+
     fun addProduct( name : String,stock : String,category : String,hargabeli : Int,hargaJual : Int,){
         viewModelScope.launch {
             repository.addProduct(name, stock, category, hargabeli, hargaJual).asFlow().collect(){
@@ -76,9 +96,19 @@ class AddViewModel(private val repository: TrackRepository): ViewModel() {
         }
     }
 
+
+
     fun membership() {
         viewModelScope.launch {
             repository.membership().asFlow().collect {
+                _uploadMembership.value = it
+            }
+        }
+    }
+
+    fun membershipTahun() {
+        viewModelScope.launch {
+            repository.membershipTahun().asFlow().collect {
                 _uploadMembership.value = it
             }
         }

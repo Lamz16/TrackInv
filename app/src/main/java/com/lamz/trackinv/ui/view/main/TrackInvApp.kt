@@ -20,6 +20,7 @@ import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.home.HomeScreen
 import com.lamz.trackinv.ui.screen.inventory.InventoryScreen
 import com.lamz.trackinv.ui.screen.inventory.detail.InvDetailScreen
+import com.lamz.trackinv.ui.screen.membership.MembershipScreen
 import com.lamz.trackinv.ui.screen.partner.CustomerScreen
 import com.lamz.trackinv.ui.screen.partner.IncomingScreen
 import com.lamz.trackinv.ui.screen.partner.SupplierScreen
@@ -41,6 +42,7 @@ fun TrackInvApp(
             if (currentRoute != Screen.DetailInventory.route &&
                 currentRoute != Screen.Add.route &&
                 currentRoute != Screen.AddProduct.route &&
+                currentRoute != Screen.Membership.route &&
                 currentRoute != Screen.Customer.route &&
                 currentRoute != Screen.Supplier.route &&
                 currentRoute != Screen.Out.route
@@ -57,6 +59,9 @@ fun TrackInvApp(
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(navController)
+            }
+            composable(Screen.Membership.route) {
+                MembershipScreen()
             }
             composable(Screen.Inventory.route) {
                 InventoryScreen(navController = navController,
