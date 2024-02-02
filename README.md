@@ -1,5 +1,7 @@
 # Aplikasi track inventory adalah aplikasi pencatatan barang.
 
+## if you want see my demo app on youtube
+ * https://www.youtube.com/watch?v=ofwyHb0dcE4
 
 ![Demo App](https://github.com/Lamz16/TrackInv/blob/master/images/0.jpeg)
 ![Demo App](https://github.com/Lamz16/TrackInv/blob/master/images/1.jpeg)
