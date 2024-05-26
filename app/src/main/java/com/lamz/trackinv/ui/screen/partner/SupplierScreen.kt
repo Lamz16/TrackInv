@@ -228,18 +228,21 @@ fun SupplierContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val idSupplier = FirebaseUtils.dbSupplier.push().key!!
-                            idUser?.let {
-                                viewModel.addSupplier(
-                                    SupplierModel(
-                                        idSupplier,
-                                        it.idUser,
-                                        addSupplier
+                            if (addSupplier.isNotEmpty()){
+                                val idSupplier = FirebaseUtils.dbSupplier.push().key!!
+                                idUser?.let {
+                                    viewModel.addSupplier(
+                                        SupplierModel(
+                                            idSupplier,
+                                            it.idUser,
+                                            addSupplier
+                                        )
                                     )
-                                )
+                                }
+
+                                showLoading = true
                             }
 
-                            showLoading = true
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)

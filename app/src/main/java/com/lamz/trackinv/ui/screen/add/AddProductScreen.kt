@@ -50,6 +50,7 @@ import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
+import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
 import com.lamz.trackinv.utils.FirebaseUtils.dbBarang
 import com.lamz.trackinv.utils.formatToCurrency
@@ -67,7 +68,7 @@ fun AddProductScreen(
             .fillMaxSize()
 
     ) {
-        AddProductContent()
+        AddProductContent(navController = navController)
     }
 
 }
@@ -78,6 +79,7 @@ fun AddProductScreen(
 fun AddProductContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
+    navController: NavHostController,
     viewModel: AddProductViewModel = koinViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -262,11 +264,9 @@ fun AddProductContent(
                     showLoading = false
                     Toast.makeText(context, "Berhasil menambah barang", Toast.LENGTH_SHORT)
                         .show()
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
-                    (context as? ComponentActivity)?.finish()
+                    navController.navigate(Screen.Inventory.route) {
+                        popUpTo(0)
+                    }
                 }
             }
 

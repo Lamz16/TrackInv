@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -44,13 +44,13 @@ fun CardCategoryItem(
         Row(
             horizontalArrangement = Arrangement.SpaceBetween, modifier = modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp, end = 25.dp)
+                .padding(horizontal = 25.dp, vertical = 8.dp)
         ) {
             Text(
                 text = nameCategory,
-                fontSize = 15.sp,
+                fontSize = 17.sp,
                 fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = Color.Black,
                 modifier = modifier
                     .align(Alignment.CenterVertically)
@@ -60,7 +60,7 @@ fun CardCategoryItem(
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Image(
-                    imageVector = Icons.Default.ArrowForwardIos, contentDescription = null,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null,
                     colorFilter = ColorFilter.tint(Color.Black),
                     modifier = modifier
                         .padding(start = 8.dp)

@@ -216,18 +216,20 @@ fun CustomerContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val idCustomer = FirebaseUtils.dbCustomer.push().key!!
-                            idUser?.let {
-                                viewModel.addCustomer(
-                                    CustomerModel(
-                                        idCustomer,
-                                        it.idUser,
-                                        addCustomer
+                            if (addCustomer.isNotEmpty()){
+                                val idCustomer = FirebaseUtils.dbCustomer.push().key!!
+                                idUser?.let {
+                                    viewModel.addCustomer(
+                                        CustomerModel(
+                                            idCustomer,
+                                            it.idUser,
+                                            addCustomer
+                                        )
                                     )
-                                )
-                            }
+                                }
 
-                            showLoading = true
+                                showLoading = true
+                            }
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)

@@ -8,6 +8,7 @@ import com.lamz.trackinv.data.model.AuthModel
 import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.data.model.CustomerModel
 import com.lamz.trackinv.data.model.SupplierModel
+import com.lamz.trackinv.data.model.TransaksiModel
 import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.data.pref.UserPreference
 import com.lamz.trackinv.helper.UiState
@@ -93,7 +94,7 @@ class TrackRepository(
     }
 
     override suspend fun addSupplier(supplier: SupplierModel) {
-        val supplierId = FirebaseUtils.dbSupplier.push().key!!
+        val supplierId = supplier.idSupp ?: ""
         val supplierRef = FirebaseUtils.dbSupplier.child(supplierId)
         supplierRef.setValue(supplier).await()
     }
@@ -103,8 +104,14 @@ class TrackRepository(
         return flowOf(snapshot.children.mapNotNull { it.getValue(SupplierModel::class.java) })
     }
 
+    override suspend fun getSupplierById(idSupplier: String): Flow<SupplierModel> {
+        val snapshot = FirebaseUtils.dbSupplier.orderByChild("idSupplier").equalTo(idSupplier).get().await()
+        val supplier = snapshot.children.firstOrNull()?.getValue(SupplierModel::class.java)
+        return  flowOf(supplier ?:SupplierModel())
+    }
+
     override suspend fun addCustomer(customer: CustomerModel) {
-        val customerId = FirebaseUtils.dbCustomer.push().key!!
+        val customerId = customer.idCs ?:""
         val customerRef = FirebaseUtils.dbCustomer.child(customerId)
         customerRef.setValue(customer).await()
     }
@@ -114,8 +121,14 @@ class TrackRepository(
         return flowOf(snapshot.children.mapNotNull { it.getValue(CustomerModel::class.java) })
     }
 
+    override suspend fun getCustomerById(idCustomer: String): Flow<CustomerModel> {
+        val snapshot = FirebaseUtils.dbCustomer.orderByChild("idCustomer").equalTo(idCustomer).get().await()
+        val customer = snapshot.children.firstOrNull()?.getValue(CustomerModel::class.java)
+        return  flowOf(customer ?:CustomerModel())
+    }
+
     override suspend fun addProduct(barang: BarangModel) {
-        val barangId = FirebaseUtils.dbBarang.push().key!!
+        val barangId = barang.idBarang ?: ""
         val barangRef = FirebaseUtils.dbBarang.child(barangId)
         barangRef.setValue(barang).await()
     }
@@ -131,4 +144,19 @@ class TrackRepository(
         return  flowOf(barang ?:BarangModel())
     }
 
+    override suspend fun deleteProduct(idBarang: String) {
+        val barangRef = FirebaseUtils.dbBarang.child(idBarang)
+        barangRef.removeValue().await()
+    }
+
+    override suspend fun updateProduct(idBarang: String, barang : BarangModel) {
+        val barangRef = FirebaseUtils.dbBarang.child(idBarang)
+        barangRef.setValue(barang).await()
+    }
+
+    override suspend fun addTransactionStock(transaksi: TransaksiModel) {
+        val transaksiId = FirebaseUtils.dbTransaksi.push().key!!
+        val transaksiRef = FirebaseUtils.dbTransaksi.child(transaksiId)
+        transaksiRef.setValue(transaksi).await()
+    }
 }

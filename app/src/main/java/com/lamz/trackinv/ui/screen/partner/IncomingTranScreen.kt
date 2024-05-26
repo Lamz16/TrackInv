@@ -1,6 +1,5 @@
 package com.lamz.trackinv.ui.screen.partner
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -53,7 +51,6 @@ import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.component.SearchBar
-import com.lamz.trackinv.ui.screen.inventory.InventoryContent
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
@@ -95,7 +92,6 @@ fun IncomingScreen(
 @Composable
 fun IncomingContent(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current,
     idCustomer: String,
     listBarang: List<BarangModel> = emptyList(),
 ) {
@@ -103,8 +99,6 @@ fun IncomingContent(
     var query by remember { mutableStateOf(TextFieldValue()) }
     val focusRequester = remember { FocusRequester() }
 
-//    val productState by viewModel.getProduct.observeAsState()
-//    val uploadState by viewModel.upload.observeAsState()
     var showOutgoing by remember { mutableStateOf(false) }
     var qty by remember { mutableStateOf("") }
     var isFocusDialog by remember { mutableStateOf(false) }
@@ -119,29 +113,9 @@ fun IncomingContent(
         }
     }
 
-//    when (uploadState) {
-//        is UiState.Loading -> {
-//
-//        }
-//
-//        is UiState.Success -> {
-//            val intent = Intent(context, MainActivity::class.java)
-//            intent.flags =
-//                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-//            context.startActivity(intent)
-//            (context as? ComponentActivity)?.finish()
-//        }
-//
-//        is UiState.Error -> {
-//
-//        }
-//
-//        else -> {}
-//    }
-    var allProducts by remember { mutableStateOf(emptyList<BarangModel>()) }
-    var filteredProducts by remember { mutableStateOf(emptyList<BarangModel>()) }
-    allProducts = listBarang
-    filteredProducts = allProducts
+
+    val allProducts by remember { mutableStateOf(listBarang) }
+    var filteredProducts by remember { mutableStateOf(allProducts) }
 
     LaunchedEffect(query) {
         filteredProducts = allProducts.filter { barang ->

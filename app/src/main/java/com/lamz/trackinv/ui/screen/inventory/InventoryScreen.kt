@@ -58,18 +58,23 @@ fun InventoryScreen(
     navigateToDetail: (String) -> Unit,
     viewModel: InventoryViewModel = koinViewModel(),
 ) {
+
+
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
         val allProductState by viewModel.getInventoryState.collectAsState()
+
+        val idUser by viewModel.getSession().observeAsState()
+
         when(val state = allProductState){
             is UiState.Error -> {
                 Text(text = state.errorMessage, modifier = Modifier.align(Alignment.Center))
             }
             UiState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                val idUser by viewModel.getSession().observeAsState()
                 LaunchedEffect(key1 = true, block = {
                     delay(500L)
                     idUser?.let {
@@ -93,8 +98,8 @@ fun InventoryContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
-    listBarang: List<BarangModel> = emptyList()
-
+    listBarang: List<BarangModel> = emptyList(),
+    viewModel: InventoryViewModel= koinViewModel(),
 ) {
     var query by remember { mutableStateOf(TextFieldValue()) }
     val isFocused by remember { mutableStateOf(false) }

@@ -4,6 +4,7 @@ import com.lamz.trackinv.data.model.AuthModel
 import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.data.model.CustomerModel
 import com.lamz.trackinv.data.model.SupplierModel
+import com.lamz.trackinv.data.model.TransaksiModel
 import com.lamz.trackinv.helper.UiState
 import kotlinx.coroutines.flow.Flow
 
@@ -12,9 +13,15 @@ interface TrackRepositoryImpl {
     suspend fun register(register: AuthModel)
     suspend fun addSupplier(supplier: SupplierModel)
     suspend fun getAllSupplier(idUser: String): Flow<List<SupplierModel>>
+    suspend fun getSupplierById(idSupplier: String): Flow<SupplierModel>
     suspend fun addCustomer(customer: CustomerModel)
     suspend fun getAllCustomer(idUser: String): Flow<List<CustomerModel>>
+    suspend fun getCustomerById(idCustomer: String): Flow<CustomerModel>
     suspend fun addProduct(barang: BarangModel)
     suspend fun getAllProduct(idUser: String): Flow<List<BarangModel>>
     suspend fun getProductId(idBarang: String): Flow<BarangModel>
+    suspend fun deleteProduct(idBarang : String)
+    suspend fun updateProduct(idBarang : String, barang: BarangModel)
+
+    suspend fun addTransactionStock(transaksi : TransaksiModel)
 }

@@ -1,6 +1,5 @@
 package com.lamz.trackinv.ui.screen.inventory.detail
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,22 +40,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.lamz.trackinv.R
 import com.lamz.trackinv.data.model.BarangModel
+import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
-import com.lamz.trackinv.utils.FirebaseUtils
+import com.lamz.trackinv.ui.screen.inventory.InventoryViewModel
+import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun InvDetailScreen(
     modifier: Modifier = Modifier,
     inventoryId: String,
     navController: NavHostController,
+    viewModel: InventoryViewModel = koinViewModel(),
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
@@ -62,7 +63,29 @@ fun InvDetailScreen(
             .fillMaxSize()
 
     ) {
-        InvDetailContent(inventoryId = inventoryId, navController = navController)
+
+        val allProductState by viewModel.getInventoryIdState.collectAsState()
+        when (val state = allProductState) {
+            is UiState.Error -> {
+                Text(text = state.errorMessage, modifier = Modifier.align(Alignment.Center))
+            }
+
+            UiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                LaunchedEffect(key1 = true, block = {
+                    delay(500L)
+                    viewModel.getInventoryId(inventoryId)
+                })
+
+            }
+
+            is UiState.Success -> {
+                InvDetailContent(inventory = state.data, navController = navController)
+                println(" ini idUser barang ${ state.data.idUser }")
+            }
+        }
+
+
     }
 
 }
@@ -71,51 +94,26 @@ fun InvDetailScreen(
 @Composable
 fun InvDetailContent(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current,
-    inventoryId: String,
+    inventory: BarangModel,
     navController: NavHostController,
+    viewModel: InventoryViewModel = koinViewModel(),
 ) {
     val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
+    val isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
     var showDelete by remember { mutableStateOf(false) }
-    var editedNamaBarang by remember { mutableStateOf("") }
-    var editedstokBarang by remember { mutableStateOf("") }
-    var editedhargaBeli by remember { mutableStateOf("") }
-    var editedhargaJual by remember { mutableStateOf("") }
+    var showLoadingUpdate by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
+    var editedNamaBarang by remember { mutableStateOf(inventory.namaBarang ?: "") }
+    var editedstokBarang by remember { mutableStateOf(inventory.stokBarang ?: "") }
+    var editedhargaBeli by remember{ mutableStateOf(inventory.buy ?: "") }
+    var editedhargaJual by remember { mutableStateOf(inventory.sell ?: "") }
+    val deleteproduct by viewModel.deleteProductState.collectAsState()
+    val updateproduct by viewModel.updateProductState.collectAsState()
 
-    val dbDetailBarang = FirebaseUtils.dbBarang
-    val dbDetailBarangRef: DatabaseReference = dbDetailBarang.child(inventoryId)
-
-
-    val getDetailBarang: () -> Unit = {
-        dbDetailBarang.orderByChild("idBarang").equalTo(inventoryId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        for (barang in snapshot.children) {
-                            val detailBarang = barang.getValue(BarangModel::class.java)
-
-                            if (detailBarang != null) {
-                                editedNamaBarang = detailBarang.namaBarang!!
-                                editedstokBarang = detailBarang.stokBarang!!
-                                editedhargaBeli = detailBarang.buy!!
-                                editedhargaJual = detailBarang.sell!!
-                            }
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
-                }
-
-            })
-
-    }
 
     LaunchedEffect(true) {
-        getDetailBarang()
+
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -165,31 +163,45 @@ fun InvDetailContent(
 
         ElevatedButton(
             onClick = {
-                      // lakukan update barang di firebase
-
+                showLoadingUpdate = true
                 val updatedBarang = BarangModel(
-                    idBarang = inventoryId,
+                    idBarang = inventory.idBarang,
+                    idUser = inventory.idUser,
                     namaBarang = editedNamaBarang,
                     stokBarang = editedstokBarang,
                     buy = editedhargaBeli,
                     sell = editedhargaJual
                 )
-                dbDetailBarangRef.setValue(updatedBarang)
-                    .addOnSuccessListener {
-                        navController.navigate(Screen.Inventory.route) {
-                            popUpTo(0)
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        // Handle failure
-                    }
+                viewModel.updateProduct(inventory.idBarang ?: "", updatedBarang)
 
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
         ) {
-            Text("Update")
+            when (val state = updateproduct) {
+                is UiState.Error -> {
+                    Text(text = state.errorMessage)
+                }
+
+                UiState.Loading -> {
+                    if (showLoadingUpdate) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text("Update")
+                    }
+                }
+
+                is UiState.Success -> {
+                    navController.navigate(Screen.Inventory.route) {
+                        popUpTo(0)
+                    }
+                }
+            }
+
         }
 
 
@@ -247,24 +259,36 @@ fun InvDetailContent(
             confirmButton = {
                 Button(
                     onClick = {
-                        //Lakukan Delete Barang di firebase
-
-                        dbDetailBarangRef.removeValue()
-                            .addOnSuccessListener {
-                                navController.navigate(Screen.Inventory.route) {
-                                    popUpTo(0)
-                                }
-                            }
-                            .addOnFailureListener { e ->
-
-                            }
-
+                        viewModel.deleteProduct(inventory.idBarang ?: "")
+                        showLoading = true
                     },
                     colors = ButtonDefaults.elevatedButtonColors(
                         containerColor = colorResource(id = R.color.Yellow)
                     )
                 ) {
-                    Text("Yes")
+                    when (val state = deleteproduct) {
+                        is UiState.Error -> {
+                            Text(text = state.errorMessage)
+                        }
+
+                        UiState.Loading -> {
+                            if (showLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = Color.Gray
+                                )
+                            } else {
+                                Text("Yes")
+                            }
+                        }
+
+                        is UiState.Success -> {
+                            navController.navigate(Screen.Inventory.route) {
+                                popUpTo(0)
+                            }
+                        }
+                    }
+
                 }
             },
             dismissButton = {
