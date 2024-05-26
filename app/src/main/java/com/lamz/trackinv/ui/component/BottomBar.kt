@@ -57,7 +57,7 @@ fun BottomBar(
                         bitmap = item.icon,
                         contentDescription = item.title,
                         tint = colorResource(id = R.color.Yellow),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = { Text(item.title, color = colorResource(id = R.color.Yellow)) },

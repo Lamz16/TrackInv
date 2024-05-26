@@ -30,32 +30,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.ui.screen.add.AddViewModel
 
 @Composable
 fun MembershipScreen(
     context: Context = LocalContext.current,
-    viewModel: AddViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
 ) {
-    val uploadMembership by viewModel.uploadMembership.observeAsState()
-    when (val state = uploadMembership) {
-
-        is UiState.Success -> {
-
-            val redirectUrl = state.data.data.redirectUrl
-            LaunchedEffect(true) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
-                context.startActivity(intent)
-                (context as? ComponentActivity)?.finish()
-            }
-        }
-        else -> {}
-    }
+//    val uploadMembership by viewModel.uploadMembership.observeAsState()
+//    when (val state = uploadMembership) {
+//
+//        is UiState.Success -> {
+//
+//            val redirectUrl = state.data.data.redirectUrl
+//            LaunchedEffect(true) {
+//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
+//                context.startActivity(intent)
+//                (context as? ComponentActivity)?.finish()
+//            }
+//        }
+//        else -> {}
+//    }
 
 
     Column(
@@ -81,7 +75,9 @@ fun MembershipScreen(
                 Text("Dapatkan lebih banyak akses menambah data", color = Color.Black, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { viewModel.membership() }, colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Yellow))) {
+                Button(onClick = {
+//                    viewModel.membership()
+                                 }, colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Yellow))) {
                     Text("Rp. 50.000", color = Color.Black)
                 }
             }
@@ -102,7 +98,9 @@ fun MembershipScreen(
                 Text("Dapatkan lebih banyak akses menambah data", color = Color.Black, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { viewModel.membershipTahun()}, colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Yellow))) {
+                Button(onClick = {
+//                    viewModel.membershipTahun()
+                                 }, colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Yellow))) {
                     Text("Rp. 500.000", color = Color.Black)
                 }
             }

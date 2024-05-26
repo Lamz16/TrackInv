@@ -1,101 +1,94 @@
 package com.lamz.trackinv.ui.screen.partner
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.lamz.trackinv.data.ItemsProduct
 import com.lamz.trackinv.data.TrackRepository
+import com.lamz.trackinv.data.model.CustomerModel
+import com.lamz.trackinv.data.model.SupplierModel
+import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.partner.AddPartnerResponse
-import com.lamz.trackinv.response.partner.GetCustomerResponse
-import com.lamz.trackinv.response.partner.GetSupplierResponse
-import com.lamz.trackinv.response.product.GetProductResponse
-import com.lamz.trackinv.response.transaksi.OutgoingResponse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class PartnerViewModel(private val repository: TrackRepository): ViewModel() {
-    private val _getCustomer = MutableLiveData<UiState<GetCustomerResponse>>()
-    val getCustomer: LiveData<UiState<GetCustomerResponse>> = _getCustomer
+class PartnerViewModel(private val repository: TrackRepository) : ViewModel() {
 
-    private val _uploadCustomer = MutableLiveData<UiState<AddPartnerResponse>>()
-    val uploadCustomer: LiveData<UiState<AddPartnerResponse>> = _uploadCustomer
+    private val _supplierState: MutableStateFlow<UiState<Unit>> = MutableStateFlow(UiState.Loading)
+    val supplierState: MutableStateFlow<UiState<Unit>> = _supplierState
 
+    private val _customerState: MutableStateFlow<UiState<Unit>> = MutableStateFlow(UiState.Loading)
+    val customerState: MutableStateFlow<UiState<Unit>> = _customerState
 
-    private val _getSupplier = MutableLiveData<UiState<GetSupplierResponse>>()
-    val getSupplier: LiveData<UiState<GetSupplierResponse>> = _getSupplier
+    private val _getSupplierState = MutableStateFlow<UiState<List<SupplierModel>>>(UiState.Loading)
+    val getSupplierState: StateFlow<UiState<List<SupplierModel>>> = _getSupplierState
 
-    private val _uploadSupplier = MutableLiveData<UiState<AddPartnerResponse>>()
-    val uploadSupplier: LiveData<UiState<AddPartnerResponse>> = _uploadSupplier
-
-    var outId by mutableStateOf("")
-
-    private val _upload = MutableLiveData<UiState<OutgoingResponse>>()
-    val upload: LiveData<UiState<OutgoingResponse>> = _upload
+    private val _getCustomerState = MutableStateFlow<UiState<List<CustomerModel>>>(UiState.Loading)
+    val getCustomerState: StateFlow<UiState<List<CustomerModel>>> = _getCustomerState
 
 
-    fun addCustomer(name : String) {
+    fun getSession(): LiveData<UserModel> {
+        return repository.getSession().asLiveData()
+    }
+
+    fun addSupplier(supplier: SupplierModel) {
         viewModelScope.launch {
-            repository.addCustomer(name).asFlow().collect {
-                _uploadCustomer.value = it
+            _supplierState.value = UiState.Loading
+            try {
+                _supplierState.value = UiState.Success(repository.addSupplier(supplier))
+            } catch (e: Exception) {
+                _supplierState.value = UiState.Error(e.message.toString())
             }
         }
     }
 
-    fun getCustomer(){
+    fun getAllSupplier(idUser : String) {
         viewModelScope.launch {
-            repository.getCustomer().asFlow().collect(){
-                _getCustomer.value = it
+            repository.getAllSupplier(idUser)
+                .catch {
+                    _getSupplierState.value = UiState.Error(it.message.toString())
+                }
+                .collect {
+                    _getSupplierState.value = UiState.Success(it)
+                    println("Suppliers loaded: $it")
+                }
+        }
+    }
+
+    fun addCustomer(customer: CustomerModel) {
+
+        viewModelScope.launch {
+            _customerState.value = UiState.Loading
+
+            try {
+                _customerState.value = UiState.Success(repository.addCustomer(customer))
+            } catch (e: Exception) {
+                _customerState.value = UiState.Error(e.message.toString())
             }
         }
     }
 
-
-    fun addSupplier(name : String) {
+    fun getAllCustomer(idUser : String){
         viewModelScope.launch {
-            repository.addSupplier(name).asFlow().collect {
-                _uploadSupplier.value = it
-            }
+            repository.getAllCustomer(idUser)
+                .catch {
+                    _getCustomerState.value = UiState.Error(it.message.toString())
+                }
+                .collect {
+                    _getCustomerState.value = UiState.Success(it)
+                }
         }
     }
 
-    fun getSupplier(){
-        viewModelScope.launch {
-            repository.getSupplier().asFlow().collect(){
-                _getSupplier.value = it
-            }
-        }
+    fun resetSupplierState() {
+        _supplierState.value = UiState.Loading
     }
 
-    private val _getProduct = MutableLiveData<UiState<GetProductResponse>>()
-    val getProduct: LiveData<UiState<GetProductResponse>> = _getProduct
-
-    fun getAllProduct(){
-        viewModelScope.launch {
-            repository.getProduct().asFlow().collect{
-                _getProduct.value = it
-            }
-        }
-    }
-
-    fun outgoingTran(partnerId : String, items : List<ItemsProduct>) {
-        viewModelScope.launch {
-            repository.outgoingTran(partnerId, items).asFlow().collect {
-                _upload.value = it
-            }
-        }
-    }
-
-    fun incomingTran(partnerId : String, items : List<ItemsProduct>) {
-        viewModelScope.launch {
-            repository.incomingTran(partnerId, items).asFlow().collect {
-                _upload.value = it
-            }
-        }
+    fun resetCustomerState() {
+        _customerState.value = UiState.Loading
     }
 
 }

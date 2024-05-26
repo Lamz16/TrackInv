@@ -16,15 +16,14 @@ import androidx.navigation.navArgument
 import com.lamz.trackinv.ui.component.BottomBar
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.screen.add.AddProductScreen
-import com.lamz.trackinv.ui.screen.add.AddScreen
 import com.lamz.trackinv.ui.screen.home.HomeScreen
 import com.lamz.trackinv.ui.screen.inventory.InventoryScreen
 import com.lamz.trackinv.ui.screen.inventory.detail.InvDetailScreen
 import com.lamz.trackinv.ui.screen.membership.MembershipScreen
 import com.lamz.trackinv.ui.screen.partner.CustomerScreen
 import com.lamz.trackinv.ui.screen.partner.IncomingScreen
-import com.lamz.trackinv.ui.screen.partner.SupplierScreen
 import com.lamz.trackinv.ui.screen.partner.OutGoingScreen
+import com.lamz.trackinv.ui.screen.partner.SupplierScreen
 import com.lamz.trackinv.ui.screen.transactions.TransactionsScreen
 import com.lamz.trackinv.ui.theme.TrackInvTheme
 
@@ -41,7 +40,6 @@ fun TrackInvApp(
         bottomBar = {
             if (currentRoute != Screen.DetailInventory.route &&
                 currentRoute != Screen.Add.route &&
-                currentRoute != Screen.AddProduct.route &&
                 currentRoute != Screen.Membership.route &&
                 currentRoute != Screen.Customer.route &&
                 currentRoute != Screen.In.route &&
@@ -88,26 +86,12 @@ fun TrackInvApp(
             }
 
             composable(Screen.Add.route) {
-                // Your main composable function
-                AddScreen(navController = navController,
-                    navigateToDetail = { categoryId ->
-                        navController.navigate(Screen.AddProduct.createRoute(categoryId))
-                    })
-            }
-            composable(
-                route = Screen.AddProduct.route,
-                arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
-            ) {
-                // Composable function for registration screen
-                val categoryId = it.arguments?.getString("categoryId") ?: "sembako"
                 AddProductScreen(
-                    categoryId = categoryId,
                     navController = navController
                 )
-
             }
             composable(route = Screen.Customer.route){
-                CustomerScreen(navController = navController,
+                CustomerScreen(
                     navigateToDetail = { idCustomer ->
                         navController.navigate(Screen.Out.createRoute(idCustomer))
                     })

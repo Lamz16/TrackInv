@@ -1,5 +1,6 @@
 package com.lamz.trackinv.utils
 
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -17,3 +18,15 @@ fun convertStringToCalendar(dateTimeString: String): Calendar {
 
     return calendar
 }
+
+fun formatToCurrency(value: String): String {
+    val cleanString = value.replace("[^\\d]".toRegex(), "")
+
+    return if (cleanString.isNotEmpty()) {
+        val formatter = DecimalFormat("#,###")
+        formatter.format(cleanString.toLong())
+    } else {
+        ""
+    }
+}
+

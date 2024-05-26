@@ -1,4 +1,4 @@
-package com.lamz.trackinv.ui.screen.inventory
+package com.lamz.trackinv.ui.screen.partner
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class InventoryViewModel(private val repository: TrackRepository) : ViewModel() {
+class TransactionViewModel(private val repository: TrackRepository) : ViewModel() {
+
     private val _getInventoryState = MutableStateFlow<UiState<List<BarangModel>>>(UiState.Loading)
     val getInventoryState: StateFlow<UiState<List<BarangModel>>> = _getInventoryState
 

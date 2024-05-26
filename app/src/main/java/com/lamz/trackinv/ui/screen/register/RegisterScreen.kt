@@ -34,9 +34,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,22 +57,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.data.model.AuthModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
+import com.lamz.trackinv.utils.FirebaseUtils
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-){  val scrollStateHorizontal = rememberScrollState()
+) {
+    val scrollStateHorizontal = rememberScrollState()
     val scrollStateVertical = rememberScrollState()
     Box(
         modifier = modifier
@@ -88,46 +89,30 @@ fun RegisterScreen(
 @Composable
 fun RegisterContent(
     context: Context = LocalContext.current,
-    viewModel: RegisterViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
-    navController: NavHostController
-    ){
+    navController: NavHostController,
+    viewModel: RegisterViewModel = koinViewModel()
+) {
     var showDialog by remember { mutableStateOf(false) }
     var showPassword by remember { mutableStateOf(value = false) }
-
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
     val containerColor = colorResource(id = R.color.lavender)
+    var namaToko by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var alamat by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var showLoading by remember { mutableStateOf(false) }
+    val regisState by viewModel.uiState.collectAsState()
     val isNotMatching = remember {
         derivedStateOf {
-            viewModel.password != viewModel.confirmPassword
+            password != confirmPassword
         }
     }
 
-    val isLoading by viewModel.isLoading.observeAsState(initial = false)
-
-    val uploadState by viewModel.upload.observeAsState()
-
-    // Menanggapi perubahan nilai upload
-    when (val uiState = uploadState) {
-        is UiState.Loading -> {
-
-        }
-        is UiState.Success -> {
-
-            showDialog = true
-
-        }
-        is UiState.Error -> {
-
-            showDialog = false
-
-        }
-
-        else -> {}
-    }
+    val database = FirebaseUtils.dbUser
 
 
     LaunchedEffect(true) {
@@ -152,7 +137,7 @@ fun RegisterContent(
 
 
         OutlinedTextField(
-            value = viewModel.namaToko,
+            value = namaToko,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -162,7 +147,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.namaToko = newInput
+                namaToko = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -175,7 +160,7 @@ fun RegisterContent(
             )
 
         OutlinedTextField(
-            value = viewModel.email,
+            value = email,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -185,7 +170,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.email = newInput
+                email = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -198,7 +183,7 @@ fun RegisterContent(
             )
 
         OutlinedTextField(
-            value = viewModel.username,
+            value = username,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -208,7 +193,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.username = newInput
+                username = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -222,7 +207,7 @@ fun RegisterContent(
 
 
         OutlinedTextField(
-            value = viewModel.password,
+            value = password,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -232,7 +217,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.password = newInput
+                password = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -271,7 +256,7 @@ fun RegisterContent(
         )
 
         OutlinedTextField(
-            value = viewModel.confirmPassword,
+            value = confirmPassword,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -281,7 +266,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.confirmPassword = newInput
+                confirmPassword = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -320,7 +305,7 @@ fun RegisterContent(
         )
 
         OutlinedTextField(
-            value = viewModel.alamat,
+            value = alamat,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -330,7 +315,7 @@ fun RegisterContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.alamat = newInput
+                alamat = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -348,33 +333,51 @@ fun RegisterContent(
 
         ElevatedButton(
             onClick = {
-                if (viewModel.password.length < 8) {
-              Toast.makeText(context,"Password kurang dari 8", Toast.LENGTH_SHORT).show()
+                if (password.length < 8) {
+                    Toast.makeText(context, "Password kurang dari 8", Toast.LENGTH_SHORT).show()
                     return@ElevatedButton
                 }
-                // Set showDialog to true when the button is clicked
-                viewModel.uploadData(
-                    viewModel.email,
-                    viewModel.password,
-                    viewModel.username,
-                    viewModel.namaToko,
-                    viewModel.alamat
+                // set action firebase
+                val userId = database.push().key!!
+                val register = AuthModel(
+                    userId,
+                    namaToko,
+                    email,
+                    username,
+                    password
                 )
+                showLoading = true
+
+                viewModel.register(register)
 
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
-            enabled = !isLoading,
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = Color.White
-                )
-            } else {
-                Text("REGISTER")
+            when (val state = regisState) {
+                UiState.Loading -> {
+                    if (showLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text("REGISTER")
+                    }
+                }
+
+                is UiState.Error -> {
+                    Toast.makeText(context, state.errorMessage, Toast.LENGTH_SHORT).show()
+                }
+
+                is UiState.Success -> {
+                    LaunchedEffect(state) {
+                        showDialog = true
+                    }
+                }
             }
+
         }
 
         if (showDialog) {
@@ -425,9 +428,10 @@ fun RegisterContent(
         Row {
             Text(text = stringResource(id = R.string.or))
 
-            ClickableText(text = AnnotatedString(stringResource(id = R.string.login)),
+            ClickableText(
+                text = AnnotatedString(stringResource(id = R.string.login)),
                 onClick = {
-                    navController.navigate(Screen.Login.route){
+                    navController.navigate(Screen.Login.route) {
                         popUpTo(0)
                     }
                 },

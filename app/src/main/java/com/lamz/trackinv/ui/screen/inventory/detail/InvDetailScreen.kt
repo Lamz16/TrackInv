@@ -24,7 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,16 +38,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.product.GetProductByIdResponse
+import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
+import com.lamz.trackinv.utils.FirebaseUtils
 
 @Composable
 fun InvDetailScreen(
@@ -72,9 +72,6 @@ fun InvDetailScreen(
 fun InvDetailContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: InvDetailViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
     inventoryId: String,
     navController: NavHostController,
 ) {
@@ -82,130 +79,129 @@ fun InvDetailContent(
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
     var showDelete by remember { mutableStateOf(false) }
-    val deleteState by viewModel.delete.observeAsState()
-    val dataState by viewModel.getProductId.observeAsState()
-    val updateState by viewModel.updateproduct.observeAsState()
+    var editedNamaBarang by remember { mutableStateOf("") }
+    var editedstokBarang by remember { mutableStateOf("") }
+    var editedhargaBeli by remember { mutableStateOf("") }
+    var editedhargaJual by remember { mutableStateOf("") }
 
-    when (deleteState) {
-        is UiState.Success -> {
-            showDelete = false
-            navController.navigate(Screen.Inventory.route) {
-                popUpTo(0)
-            }
-        }
+    val dbDetailBarang = FirebaseUtils.dbBarang
+    val dbDetailBarangRef: DatabaseReference = dbDetailBarang.child(inventoryId)
 
-        else -> {}
-    }
 
-    when (updateState) {
-        is UiState.Success -> {
-            navController.navigate(Screen.Inventory.route) {
-                popUpTo(0)
-            }
-        }
+    val getDetailBarang: () -> Unit = {
+        dbDetailBarang.orderByChild("idBarang").equalTo(inventoryId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (barang in snapshot.children) {
+                            val detailBarang = barang.getValue(BarangModel::class.java)
 
-        else -> {}
+                            if (detailBarang != null) {
+                                editedNamaBarang = detailBarang.namaBarang!!
+                                editedstokBarang = detailBarang.stokBarang!!
+                                editedhargaBeli = detailBarang.buy!!
+                                editedhargaJual = detailBarang.sell!!
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
+
     }
 
     LaunchedEffect(true) {
-        viewModel.getProductId(inventoryId)
-        viewModel.productId = inventoryId
-
+        getDetailBarang()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
     }
 
-    when (dataState) {
-        is UiState.Success -> {
-            val product = (dataState as UiState.Success<GetProductByIdResponse>).data
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
 
-            viewModel.namaBarang = product.name
-            viewModel.stokBarang = product.stok.toString()
-            viewModel.hargaBeli = product.hargaBeli.toString()
-            viewModel.hargaJual = product.hargaJual.toString()
-            viewModel.categoryId = product.category.id
-
-            var editedNamaBarang by remember { mutableStateOf(viewModel.namaBarang) }
-            var editedstokBarang by remember { mutableStateOf(viewModel.stokBarang) }
-            var editedhargaBeli by remember { mutableStateOf(viewModel.hargaBeli) }
-            var editedhargaJual by remember { mutableStateOf(viewModel.hargaJual) }
+        TextItem(
+            desc = "Update Barang",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 36.sp,
+        )
 
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        val containerColor = colorResource(id = R.color.lavender)
 
-                TextItem(
-                    desc = "Update Barang",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 36.sp,
+        OutLinedTextItem(
+            editedNamaBarang,
+            text = "Nama Barang",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Text,
+            onValueChange = { editedNamaBarang = it })
+        OutLinedTextItem(
+            editedstokBarang,
+            text = "Stok Barang",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { editedstokBarang = it })
+        OutLinedTextItem(
+            editedhargaBeli,
+            text = "Harga Beli",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { editedhargaBeli = it })
+        OutLinedTextItem(
+            editedhargaJual,
+            text = "Harga Jual",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { editedhargaJual = it })
+
+        ElevatedButton(
+            onClick = {
+                      // lakukan update barang di firebase
+
+                val updatedBarang = BarangModel(
+                    idBarang = inventoryId,
+                    namaBarang = editedNamaBarang,
+                    stokBarang = editedstokBarang,
+                    buy = editedhargaBeli,
+                    sell = editedhargaJual
                 )
+                dbDetailBarangRef.setValue(updatedBarang)
+                    .addOnSuccessListener {
+                        navController.navigate(Screen.Inventory.route) {
+                            popUpTo(0)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        // Handle failure
+                    }
 
-
-                val containerColor = colorResource(id = R.color.lavender)
-
-                OutLinedTextItem(
-                    editedNamaBarang,
-                    text = "Nama Barang",
-                    containerColor = containerColor,
-                    keyboardType = KeyboardType.Text,
-                    onValueChange = {  editedNamaBarang = it })
-                OutLinedTextItem(
-                    editedstokBarang,
-                    text = "Stok Barang",
-                    containerColor = containerColor,
-                    keyboardType = KeyboardType.Number,
-                    onValueChange = { editedstokBarang = it })
-                OutLinedTextItem(
-                    editedhargaBeli,
-                    text = "Harga Beli",
-                    containerColor = containerColor,
-                    keyboardType = KeyboardType.Number,
-                    onValueChange = { editedhargaBeli = it })
-                OutLinedTextItem(
-                    editedhargaJual,
-                    text = "Harga Jual",
-                    containerColor = containerColor,
-                    keyboardType = KeyboardType.Number,
-                    onValueChange = { editedhargaJual = it })
-
-                ElevatedButton(
-                    onClick = {
-                        viewModel.updateProduct(
-                            inventoryId,
-                            editedNamaBarang,
-                            editedstokBarang,
-                            viewModel.categoryId,
-                            editedhargaBeli.toInt(),
-                            editedhargaJual.toInt()
-                        )
-                    },
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = colorResource(id = R.color.Yellow)
-                    ),
-                ) {
-                    Text("Update")
-                }
-            }
-
+            },
+            colors = ButtonDefaults.elevatedButtonColors(
+                containerColor = colorResource(id = R.color.Yellow)
+            ),
+        ) {
+            Text("Update")
         }
 
-        is UiState.Error -> {
 
-        }
-
-        else -> {}
     }
+
+
+
 
     TopAppBar(
         title = {
             Text(
-                stringResource(id = R.string.tambah_barang),
+                stringResource(id = R.string.detail_barang, editedNamaBarang),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 24.sp,
             )
@@ -251,7 +247,18 @@ fun InvDetailContent(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.deleteProd(viewModel.productId)
+                        //Lakukan Delete Barang di firebase
+
+                        dbDetailBarangRef.removeValue()
+                            .addOnSuccessListener {
+                                navController.navigate(Screen.Inventory.route) {
+                                    popUpTo(0)
+                                }
+                            }
+                            .addOnFailureListener { e ->
+
+                            }
+
                     },
                     colors = ButtonDefaults.elevatedButtonColors(
                         containerColor = colorResource(id = R.color.Yellow)

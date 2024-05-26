@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -42,20 +44,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.OutLinedTextItem
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.view.main.MainActivity
+import com.lamz.trackinv.utils.FirebaseUtils.dbBarang
+import com.lamz.trackinv.utils.formatToCurrency
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun AddProductScreen(
-    categoryId: String,
     modifier: Modifier = Modifier,
     navController: NavHostController,
 ) {
@@ -65,7 +67,7 @@ fun AddProductScreen(
             .fillMaxSize()
 
     ) {
-        AddProductContent(categoryId = categoryId)
+        AddProductContent()
     }
 
 }
@@ -76,50 +78,23 @@ fun AddProductScreen(
 fun AddProductContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: AddViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
-    categoryId: String,
+    viewModel: AddProductViewModel = koinViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    var showCategory by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
+    val isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
 
+    var namaBarang by remember { mutableStateOf("") }
+    var stokBarang by remember { mutableStateOf("") }
+    var hargaBeli by remember { mutableStateOf("") }
+    var hargaJual by remember { mutableStateOf("") }
 
-    val uploadState by viewModel.uploadProduct.observeAsState()
-
-    // Menanggapi perubahan nilai upload
-    when (uploadState) {
-        is UiState.Loading -> {
-
-        }
-
-        is UiState.Success -> {
-            showCategory = false
-            Toast.makeText(context, "Berhasil menambah barang", Toast.LENGTH_SHORT).show()
-            val intent = Intent(context, MainActivity::class.java)
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            (context as? ComponentActivity)?.finish()
-
-        }
-
-        is UiState.Error -> {
-            Toast.makeText(context, "Perbanyak limit mu dengan berlangganan", Toast.LENGTH_SHORT)
-                .show()
-
-        }
-
-        else -> {}
-    }
-
+    val idUser by viewModel.getSession().observeAsState()
+    val addProductState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(true) {
-        viewModel.getCategoryId(categoryId)
-        viewModel.categoryId = categoryId
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -222,28 +197,80 @@ fun AddProductContent(
         val containerColor = colorResource(id = R.color.lavender)
 
 
-/**       Using component view for set input column */
+        /**       Using component view for set input column */
 
-        OutLinedTextItem(viewModel.namaBarang,text = "Nama Barang", containerColor = containerColor, keyboardType = KeyboardType.Text , onValueChange = {viewModel.namaBarang = it})
-        OutLinedTextItem(viewModel.stokBarang,text = "Stok Barang", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.stokBarang = it})
-        OutLinedTextItem(viewModel.hargaBeli,text = "Harga Beli", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.hargaBeli = it})
-        OutLinedTextItem(viewModel.hargaJual,text = "Harga Jual", containerColor = containerColor, keyboardType = KeyboardType.Number , onValueChange = {viewModel.hargaJual = it})
+        OutLinedTextItem(
+            namaBarang,
+            text = "Nama Barang",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Text,
+            onValueChange = { namaBarang = it })
+        OutLinedTextItem(
+            stokBarang,
+            text = "Stok Barang",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { stokBarang = it })
+        OutLinedTextItem(
+            formatToCurrency(hargaBeli),
+            text = "Harga Beli",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { hargaBeli = it.replace(".", "") })
+        OutLinedTextItem(
+            formatToCurrency(hargaJual),
+            text = "Harga Jual",
+            containerColor = containerColor,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { hargaJual = it.replace(".", "") })
 
         ElevatedButton(
             onClick = {
-                viewModel.addProduct(
-                    viewModel.namaBarang,
-                    viewModel.stokBarang,
-                    viewModel.categoryId,
-                    viewModel.hargaBeli.toInt(),
-                    viewModel.hargaJual.toInt()
-                )
+                showLoading = true
+                // set action firebase
+                idUser?.let {
+                    val idBarang = dbBarang.push().key!!
+                    val barang = BarangModel(
+                        idBarang,
+                        it.idUser,
+                        namaBarang,
+                        stokBarang,
+                        hargaBeli,
+                        hargaJual
+                    )
+                    viewModel.addProduct(barang)
+                }
+
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
         ) {
-            Text("Tambah")
+            when(addProductState){
+                is UiState.Error -> { }
+                UiState.Loading -> {
+                    if (showLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text("Tambah")
+                    }
+                }
+                is UiState.Success -> {
+                    showLoading = false
+                    Toast.makeText(context, "Berhasil menambah barang", Toast.LENGTH_SHORT)
+                        .show()
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                    (context as? ComponentActivity)?.finish()
+                }
+            }
+
+
         }
     }
 }

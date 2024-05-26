@@ -1,6 +1,5 @@
 package com.lamz.trackinv.ui.screen.inventory
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,14 +18,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -36,22 +36,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.product.DataItem
-import com.lamz.trackinv.response.product.GetProductResponse
 import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.component.SearchBar
 import com.lamz.trackinv.ui.navigation.Screen
+import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -59,12 +56,34 @@ fun InventoryScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
+    viewModel: InventoryViewModel = koinViewModel(),
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        InventoryContent(navController = navController, navigateToDetail = navigateToDetail)
+        val allProductState by viewModel.getInventoryState.collectAsState()
+        when(val state = allProductState){
+            is UiState.Error -> {
+                Text(text = state.errorMessage, modifier = Modifier.align(Alignment.Center))
+            }
+            UiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                val idUser by viewModel.getSession().observeAsState()
+                LaunchedEffect(key1 = true, block = {
+                    delay(500L)
+                    idUser?.let {
+                        viewModel.getAllInventory(it.idUser)
+                    }
+                })
+
+            }
+            is UiState.Success -> {
+                InventoryContent(navController = navController, navigateToDetail = navigateToDetail, listBarang = state.data)
+            }
+        }
+
+
     }
 }
 
@@ -72,48 +91,37 @@ fun InventoryScreen(
 @Composable
 fun InventoryContent(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current,
-    viewModel: InventoryViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
     navController: NavHostController,
     navigateToDetail: (String) -> Unit,
+    listBarang: List<BarangModel> = emptyList()
+
 ) {
     var query by remember { mutableStateOf(TextFieldValue()) }
     val isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var showDialog by remember { mutableStateOf(false) }
-    val productState by viewModel.getProduct.observeAsState()
+
 
     LaunchedEffect(true) {
-        viewModel.getAllProduct()
         if (isFocused) {
             focusRequester.requestFocus()
         }
     }
+    var allProducts by remember { mutableStateOf(emptyList<BarangModel>()) }
+    var filteredProducts by remember { mutableStateOf(emptyList<BarangModel>()) }
 
-    var filteredProducts by remember(productState, query.text) {
-        mutableStateOf<List<DataItem>>(emptyList())
-    }
+    allProducts = listBarang
+    filteredProducts = allProducts
 
-    DisposableEffect(productState, query.text) {
-        when (productState) {
-            is UiState.Success -> {
-                val allProducts = (productState as UiState.Success<GetProductResponse>).data.data
-                filteredProducts = if (query.text.isNotEmpty()) {
-                    allProducts.filter {
-                        it.name.contains(query.text, ignoreCase = true) ||
-                                it.category.name.contains(query.text, ignoreCase = true) ||
-                                it.hargaBeli.toString().contains(query.text, ignoreCase = true)
-                    }
-                } else {
-                    allProducts
-                }
-            }
-            else -> {}
+    LaunchedEffect(query) {
+        filteredProducts = allProducts.filter { barang ->
+            val searchText = query.text.lowercase()
+            (barang.namaBarang?.lowercase()?.contains(searchText) ?: false) or
+                    (barang.stokBarang?.lowercase()?.contains(searchText) ?: false) or
+                    (barang.buy?.lowercase()?.contains(searchText) ?: false)
         }
-        onDispose { }
     }
+
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -124,36 +132,32 @@ fun InventoryContent(
             contentPadding = PaddingValues(top = 80.dp, bottom = 80.dp),
             modifier = Modifier.padding(top = 8.dp)
         ) {
-            when (productState) {
-                is UiState.Success -> {
-                    items(filteredProducts) { inventory ->
-                        CardLongItem(
-                            modifier = Modifier.clickable {
-                                navigateToDetail(inventory.id)
-                            },
-                            namaItem = inventory.name,
-                            pieces = inventory.stok.toString(),
-                            category = inventory.category.name,
-                            id = inventory.hargaBeli.toString()
-                        )
-                    }
+            items(filteredProducts) { inventory ->
+                CardLongItem(
+                    modifier = Modifier.clickable {
+                        navigateToDetail(inventory.idBarang!!)
+                    },
+                    namaItem = inventory.namaBarang!!,
+                    pieces = inventory.stokBarang!!,
+                    hargaJual = inventory.sell!!,
+                    hargaBeli = inventory.buy!!
+                )
+            }
 
-                    if (filteredProducts.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Data barang kosong. Tambahkan terlebih dahulu.")
-                            }
-                        }
+            if (filteredProducts.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Data barang kosong. Tambahkan terlebih dahulu.")
                     }
                 }
-                else -> {}
             }
+
         }
 
         SearchBar(

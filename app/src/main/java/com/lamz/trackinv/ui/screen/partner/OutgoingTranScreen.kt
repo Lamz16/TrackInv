@@ -1,19 +1,14 @@
 package com.lamz.trackinv.ui.screen.partner
 
 import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,10 +24,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,18 +41,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.ItemsProduct
-import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.product.DataItem
-import com.lamz.trackinv.response.product.GetProductResponse
-import com.lamz.trackinv.ui.component.CardLongItem
 import com.lamz.trackinv.ui.component.SearchBar
-import com.lamz.trackinv.ui.view.main.MainActivity
 
 @Composable
 fun OutGoingScreen(
@@ -78,17 +62,17 @@ fun OutGoingScreen(
 fun OutGoingContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: PartnerViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
+//    viewModel: PartnerViewModel = viewModel(
+//        factory = ViewModelFactory(Injection.provideRepository(context))
+//    ),
     idCustomer: String,
 ) {
 
     var query by remember { mutableStateOf(TextFieldValue()) }
     val focusRequester = remember { FocusRequester() }
 
-    val productState by viewModel.getProduct.observeAsState()
-    val uploadState by viewModel.upload.observeAsState()
+//    val productState by viewModel.getProduct.observeAsState()
+//    val uploadState by viewModel.upload.observeAsState()
     var showOutgoing by remember { mutableStateOf(false) }
     var qty by remember { mutableStateOf("") }
     var isFocusDialog by remember { mutableStateOf(false) }
@@ -98,55 +82,55 @@ fun OutGoingContent(
 
 
     LaunchedEffect(true) {
-        viewModel.getAllProduct()
+//        viewModel.getAllProduct()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
     }
 
-    when (uploadState) {
-        is UiState.Loading -> {
+//    when (uploadState) {
+//        is UiState.Loading -> {
+//
+//        }
+//
+//        is UiState.Success -> {
+//            val intent = Intent(context, MainActivity::class.java)
+//            intent.flags =
+//                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//            context.startActivity(intent)
+//            (context as? ComponentActivity)?.finish()
+//        }
+//
+//        is UiState.Error -> {
+//
+//        }
+//
+//        else -> {}
+//    }
 
-        }
+//    var filteredProducts by remember(productState, query.text) {
+//        mutableStateOf<List<DataItem>>(emptyList())
+//    }
 
-        is UiState.Success -> {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            (context as? ComponentActivity)?.finish()
-        }
-
-        is UiState.Error -> {
-
-        }
-
-        else -> {}
-    }
-
-    var filteredProducts by remember(productState, query.text) {
-        mutableStateOf<List<DataItem>>(emptyList())
-    }
-
-    DisposableEffect(productState, query.text) {
-        when (productState) {
-            is UiState.Success -> {
-                val allProducts = (productState as UiState.Success<GetProductResponse>).data.data
-                filteredProducts = if (query.text.isNotEmpty()) {
-                    allProducts.filter {
-                        it.name.contains(query.text, ignoreCase = true) ||
-                                it.category.name.contains(query.text, ignoreCase = true) ||
-                                it.hargaBeli.toString().contains(query.text, ignoreCase = true)
-                    }
-                } else {
-                    allProducts
-                }
-            }
-
-            else -> {}
-        }
-        onDispose { }
-    }
+//    DisposableEffect(productState, query.text) {
+//        when (productState) {
+//            is UiState.Success -> {
+//                val allProducts = (productState as UiState.Success<GetProductResponse>).data.data
+//                filteredProducts = if (query.text.isNotEmpty()) {
+//                    allProducts.filter {
+//                        it.name.contains(query.text, ignoreCase = true) ||
+//                                it.category.name.contains(query.text, ignoreCase = true) ||
+//                                it.hargaBeli.toString().contains(query.text, ignoreCase = true)
+//                    }
+//                } else {
+//                    allProducts
+//                }
+//            }
+//
+//            else -> {}
+//        }
+//        onDispose { }
+//    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -157,38 +141,38 @@ fun OutGoingContent(
             contentPadding = PaddingValues(top = 80.dp, bottom = 80.dp),
             modifier = Modifier.padding(top = 8.dp)
         ) {
-            when (productState) {
-                is UiState.Success -> {
-                    items(filteredProducts) { inventory ->
-                        CardLongItem(
-                            modifier = Modifier.clickable {
-                                viewModel.outId = inventory.id
-                                showOutgoing = true
-                            },
-                            namaItem = inventory.name,
-                            pieces = inventory.stok.toString(),
-                            category = inventory.category.name,
-                            id = inventory.hargaBeli.toString()
-                        )
-                    }
-
-                    if (filteredProducts.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Data barang kosong. Tambahkan terlebih dahulu.")
-                            }
-                        }
-                    }
-                }
-
-                else -> {}
-            }
+//            when (productState) {
+//                is UiState.Success -> {
+//                    items(filteredProducts) { inventory ->
+//                        CardLongItem(
+//                            modifier = Modifier.clickable {
+//                                viewModel.outId = inventory.id
+//                                showOutgoing = true
+//                            },
+//                            namaItem = inventory.name,
+//                            pieces = inventory.stok.toString(),
+//                            category = inventory.category.name,
+//                            id = inventory.hargaBeli.toString()
+//                        )
+//                    }
+//
+//                    if (filteredProducts.isEmpty()) {
+//                        item {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .fillMaxHeight()
+//                                    .padding(16.dp),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                Text("Data barang kosong. Tambahkan terlebih dahulu.")
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                else -> {}
+//            }
         }
 
         if (showOutgoing) {
@@ -227,8 +211,8 @@ fun OutGoingContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val itemsList = listOf(ItemsProduct(viewModel.outId, qty.toInt()))
-                            viewModel.outgoingTran(idCustomer, itemsList)
+//                            val itemsList = listOf(ItemsProduct(viewModel.outId, qty.toInt()))
+//                            viewModel.outgoingTran(idCustomer, itemsList)
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)

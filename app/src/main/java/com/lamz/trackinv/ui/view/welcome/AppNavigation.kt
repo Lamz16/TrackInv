@@ -24,6 +24,5 @@ fun AppNavigation() {
             RegisterScreen(navController = navController)
 
         }
-        // Add more destinations as needed
     }
 }

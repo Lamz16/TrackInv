@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,17 +27,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CardLongItem(
     namaItem: String,
     pieces: String,
-    category: String,
-    id: String,
+    hargaJual: String,
+    hargaBeli: String,
     modifier: Modifier = Modifier,
 
 
 ){
+    val sell = hargaJual.toInt()
+    val buy = hargaBeli.toInt()
+    val formattedPriceJual = NumberFormat.getNumberInstance(Locale("id", "ID")).format(sell)
+    val formattedPriceBeli = NumberFormat.getNumberInstance(Locale("id", "ID")).format(buy)
+
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
@@ -56,7 +64,7 @@ fun CardLongItem(
                 painter = painterResource(id = R.drawable.ic_list_barang),
                 contentDescription = null,
                 modifier = modifier
-                    .padding(start = 10.dp, end = 10.dp, bottom = 5.dp, top = 5.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
                     .background(
                         colorResource(id = R.color.white), shape = RoundedCornerShape(8.dp)
                     )
@@ -68,23 +76,23 @@ fun CardLongItem(
                 fontWeight = FontWeight.Bold,
                 color = Color.Blue,
                 modifier = modifier
-                    .padding(top = 10.dp)
+                    .align(Alignment.CenterVertically)
             )
         }
-        Divider(
+        HorizontalDivider(
             thickness = 1.dp, color = Color.Black
         )
         Row (
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp, end = 25.dp)
+                .padding(start = 16.dp, end = 25.dp)
         ){
             Text(
                 text = stringResource(id = R.string.stok)
             )
             Text(
-                text = stringResource(id = R.string.category)
+                text = stringResource(id = R.string.harga_jual)
             )
             Text(
                 text = stringResource(id = R.string.harga_beli)
@@ -94,16 +102,16 @@ fun CardLongItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp)
+                .padding(start = 16.dp, end = 20.dp, top = 10.dp)
         ){
             Text(
                 text = pieces
             )
             Text(
-                text = category
+                text = stringResource(id = R.string.id_inventory, formattedPriceJual)
             )
             Text(
-                text = stringResource(id = R.string.id_inventory, id)
+                text = stringResource(id = R.string.id_inventory, formattedPriceBeli)
             )
         }
     }

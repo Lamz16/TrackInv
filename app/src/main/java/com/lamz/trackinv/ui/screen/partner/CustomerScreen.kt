@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -53,22 +55,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
+import com.lamz.trackinv.data.model.CustomerModel
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.partner.GetCustomerResponse
 import com.lamz.trackinv.ui.component.CardCategoryItem
-import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
+import com.lamz.trackinv.utils.FirebaseUtils
+import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CustomerScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
     navigateToDetail: (String) -> Unit,
+    viewModel: PartnerViewModel = koinViewModel()
 ) {
 
     Box(
@@ -77,7 +77,25 @@ fun CustomerScreen(
             .fillMaxSize()
 
     ) {
-        CustomerContent(navController = navController, navigateToDetail = navigateToDetail)
+        val customerState by viewModel.getCustomerState.collectAsState()
+        when (val state = customerState) {
+            is UiState.Error -> {}
+            UiState.Loading -> {
+                CircularProgressIndicator(modifier.align(Alignment.Center))
+                val idUser by viewModel.getSession().observeAsState()
+                LaunchedEffect(key1 = true, block = {
+                    delay(1200L)
+                    idUser?.let {
+                        viewModel.getAllCustomer(it.idUser)
+                    }
+                })
+            }
+
+            is UiState.Success -> {
+                CustomerContent(navigateToDetail = navigateToDetail, listCustomer = state.data)
+            }
+        }
+
 
     }
 
@@ -86,48 +104,26 @@ fun CustomerScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerContent(
-    modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: PartnerViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
-    navController: NavHostController,
     navigateToDetail: (String) -> Unit,
+    listCustomer: List<CustomerModel> = emptyList(),
+    viewModel: PartnerViewModel = koinViewModel(),
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    var showCategory by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
+    var addDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
     var addCustomer by remember { mutableStateOf("") }
 
+    val customerState by viewModel.customerState.collectAsState()
+    val idUser by viewModel.getSession().observeAsState()
 
-    val uploadState by viewModel.uploadCustomer.observeAsState()
-    val customerState by viewModel.getCustomer.observeAsState()
     val listState = rememberLazyListState()
 
-    when (uploadState) {
-        is UiState.Loading -> {
-
-        }
-
-        is UiState.Success -> {
-            showCategory = false
-            Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.Customer.route) {
-                popUpTo(Screen.Home.route)
-            }
-        }
-
-        is UiState.Error -> {
-            Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-        }
-
-        else -> {}
-    }
 
     LaunchedEffect(true) {
-        viewModel.getCustomer()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -153,7 +149,7 @@ fun CustomerContent(
 
                     IconButton(
                         onClick = {
-                            showCategory = true
+                            addDialog = true
                         }
                     ) {
                         Icon(
@@ -184,11 +180,11 @@ fun CustomerContent(
             }
         )
 
-        if (showCategory) {
+        if (addDialog) {
             AlertDialog(
                 onDismissRequest = {
                     // Handle dialog dismissal if needed
-                    showCategory = false
+                    addDialog = false
                 },
                 title = {
                     Text("Tambahkan partner")
@@ -202,7 +198,7 @@ fun CustomerContent(
                             unfocusedContainerColor = containerColor,
                             disabledContainerColor = containerColor,
                         ),
-                        label = { Text(text = "Nama Kategori") },
+                        label = { Text(text = "Nama Customer") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         singleLine = true,
                         onValueChange = { newInput ->
@@ -220,19 +216,59 @@ fun CustomerContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.addCustomer(addCustomer)
+                            val idCustomer = FirebaseUtils.dbCustomer.push().key!!
+                            idUser?.let {
+                                viewModel.addCustomer(
+                                    CustomerModel(
+                                        idCustomer,
+                                        it.idUser,
+                                        addCustomer
+                                    )
+                                )
+                            }
+
+                            showLoading = true
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)
                         )
                     ) {
-                        Text("Yes")
+                        when (val state = customerState) {
+                            UiState.Loading -> {
+                                if (showLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = Color.Gray
+                                    )
+                                } else {
+                                    Text("Yes")
+                                }
+                            }
+
+                            is UiState.Error -> {
+                                Toast.makeText(context, state.errorMessage, Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            is UiState.Success -> {
+                                showLoading = false
+                                addDialog = false
+                                addCustomer = ""
+                                LaunchedEffect(true) {
+                                    idUser?.let {
+                                        viewModel.getAllCustomer(it.idUser)
+                                    }
+
+                                    viewModel.resetCustomerState()
+                                }
+                            }
+                        }
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = {
-                            showCategory = false
+                            addDialog = false
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = Color.Black
@@ -247,7 +283,6 @@ fun CustomerContent(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = {
-                    // Handle dialog dismissal if needed
                     showDialog = false
                 },
                 title = {
@@ -294,45 +329,28 @@ fun CustomerContent(
             state = listState, contentPadding = PaddingValues(bottom = 120.dp),
             modifier = Modifier.padding(top = 48.dp)
         ) {
-            when (customerState) {
-                is UiState.Loading -> {
-                    // Display loading indicator if needed
+            items(listCustomer) { customer ->
+                customer.namaCs?.let {
+                    CardCategoryItem(
+                        nameCategory = it,
+                        modifier = Modifier.clickable {
+                            customer.idCs?.let { it1 -> navigateToDetail(it1) }
+                        })
                 }
+            }
 
-                is UiState.Success -> {
-                    val categories =
-                        (customerState as UiState.Success<GetCustomerResponse>).data.data
-
-                    // Display each category in LazyColumn
-                    items(categories) { customer ->
-                        CardCategoryItem(
-                            nameCategory = customer.name,
-                            modifier = Modifier.clickable {
-                                navigateToDetail(customer.id)
-                            })
+            if (listCustomer.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Data partner masih kosong. Tambahkan dulu.")
                     }
-
-                    if (categories.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Data partner masih kosong. Tambahkan dulu.")
-                            }
-                        }
-                    }
-
                 }
-
-                is UiState.Error -> {
-                    // Handle error state if needed
-                }
-
-                else -> {}
             }
 
 

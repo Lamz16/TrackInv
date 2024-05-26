@@ -1,9 +1,13 @@
 package com.lamz.trackinv.ui.screen.login
 
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,8 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -34,8 +36,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,6 +47,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -56,16 +59,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
 import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.helper.UiState
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
-import com.lamz.trackinv.ui.view.main.MainActivity
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
@@ -89,15 +89,14 @@ fun LoginScreen(
 @Composable
 fun LoginContent(
     context: Context = LocalContext.current,
-    viewModel: LoginViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: LoginViewModel = koinViewModel()
 
 ) {
 
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    var showDialog by remember { mutableStateOf(false) }
     var showPassword by remember { mutableStateOf(value = false) }
 
     val focusRequester = remember { FocusRequester() }
@@ -105,38 +104,24 @@ fun LoginContent(
     val wasFocused = remember { isFocused }
 
     var showLoading by remember { mutableStateOf(false) }
-    val uploadState by viewModel.upload.observeAsState()
+    val loginState by viewModel.uiState.collectAsState()
 
-    when (val uiState = uploadState) {
-        is UiState.Loading -> {
-            showLoading = true
-        }
-
-        is UiState.Success -> {
-
-            showDialog = true
-            viewModel.saveSession(
-                UserModel(
-                    uiState.data.dataLoginPost.user.email,
-                    uiState.data.dataLoginPost.user.username,
-                    uiState.data.dataLoginPost.token,
-                    uiState.data.dataLoginPost.user.namaToko,
-                    true
-                )
-            )
-
-        }
-
-        is UiState.Error -> {
-            showLoading = false
-            Toast.makeText(context, "Password atau Email salah", Toast.LENGTH_SHORT).show()
-        }
-
-        else -> {}
-    }
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val animatedFloat = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 30f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3000,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
 
 
-    LaunchedEffect(true) {
+
+    LaunchedEffect(Unit) {
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -154,11 +139,15 @@ fun LoginContent(
             desc = stringResource(id = R.string.login),
             fontWeight = FontWeight.SemiBold,
             fontSize = 45.sp,
+            modifier = Modifier.graphicsLayer {
+                this.translationY = animatedFloat.value
+                this.translationX = animatedFloat.value
+            }
         )
 
         val containerColor = colorResource(id = R.color.lavender)
         OutlinedTextField(
-            value = viewModel.email,
+            value = email,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
@@ -168,7 +157,7 @@ fun LoginContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.email = newInput
+                email = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -182,7 +171,7 @@ fun LoginContent(
 
         val containerColor1 = colorResource(id = R.color.lavender)
         OutlinedTextField(
-            value = viewModel.password,
+            value = password,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor1,
                 unfocusedContainerColor = containerColor1,
@@ -192,7 +181,7 @@ fun LoginContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             onValueChange = { newInput ->
-                viewModel.password = newInput
+                password = newInput
             },
             shape = RoundedCornerShape(size = 20.dp),
             modifier = Modifier
@@ -232,57 +221,45 @@ fun LoginContent(
 
         ElevatedButton(
             onClick = {
-                if (viewModel.password.length < 8) {
+                if (password.length < 8) {
                     Toast.makeText(context, "Password kurang dari 8", Toast.LENGTH_SHORT).show()
                     return@ElevatedButton
                 }
-
-                viewModel.login(viewModel.email, viewModel.password)
-
+                showLoading = true
+                viewModel.login(email,password)
             },
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = colorResource(id = R.color.Yellow)
             ),
         ) {
-            if (showLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = Color.Gray
-                )
-            } else {
-                Text("LOGIN")
+
+            when(val state = loginState){
+                UiState.Loading ->{
+                    if (showLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Gray
+                        )
+                    }else{
+                        Text("LOGIN")
+                    }
+                }
+
+                is UiState.Error -> {
+                    Toast.makeText(context, state.errorMessage, Toast.LENGTH_SHORT).show()
+                }
+
+                is UiState.Success -> {
+                    LaunchedEffect(state) {
+                        viewModel.saveSession(UserModel(state.data.email ?:"",state.data.idUser ?: "", state.data.nama ?: "", true))
+                    }
+                }
             }
+
         }
 
-        if (showDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    // Handle dialog dismissal if needed
-                    showDialog = false
-                },
-                title = {
-                    Text("Login Berhasil")
-                },
-                text = {
-                    Text("Yuk lanjutin ke halaman selanjutnya")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showDialog = false
-                            navController.navigate(Screen.Home.route){
-                                popUpTo(0)
-                            }
-                        },
-                        colors = ButtonDefaults.elevatedButtonColors(
-                            containerColor = colorResource(id = R.color.Yellow)
-                        )
-                    ) {
-                        Text("Yes")
-                    }
-                },
-            )
-        }
+
+
 
         Row {
             Text(text = stringResource(id = R.string.to_register))

@@ -1,45 +1,29 @@
 package com.lamz.trackinv.ui.screen.register
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.lamz.trackinv.data.TrackRepository
+import com.lamz.trackinv.data.model.AuthModel
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.auth.RegisterResponse
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel(private val repository: TrackRepository): ViewModel() {
-    var namaToko by mutableStateOf("")
-    var email by mutableStateOf("")
-    var alamat by mutableStateOf("")
-    var username by mutableStateOf("")
-    var password by mutableStateOf("")
-    var confirmPassword by mutableStateOf("")
+class RegisterViewModel(private val repository: TrackRepository) : ViewModel() {
+
+    private val _uiState : MutableStateFlow<UiState<Unit>> = MutableStateFlow(UiState.Loading)
+    val uiState : MutableStateFlow<UiState<Unit>> = _uiState
 
 
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    private val _upload = MutableLiveData<UiState<RegisterResponse>>()
-    val upload: LiveData<UiState<RegisterResponse>> = _upload
-
-    fun uploadData(email: String, password: String, username: String, namaToko: String, alamat: String) {
+    fun register(register : AuthModel) {
         viewModelScope.launch {
+            _uiState.value = UiState.Loading
             try {
-                _isLoading.postValue(true) // Set loading to true
-
-                repository.registerAccount(email, password, username, namaToko, alamat).asFlow().collect {
-                    _upload.value = it
-                }
-            } finally {
-                _isLoading.postValue(false) // Set loading to false
+                _uiState.value = UiState.Success(repository.register(register))
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
+
+
 }

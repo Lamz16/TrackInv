@@ -1,39 +1,35 @@
 package com.lamz.trackinv.data
 
-import androidx.lifecycle.liveData
-import com.google.gson.Gson
-import com.lamz.trackinv.api.ApiConfig
-import com.lamz.trackinv.api.ApiService
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.lamz.trackinv.data.model.AuthModel
+import com.lamz.trackinv.data.model.BarangModel
+import com.lamz.trackinv.data.model.CustomerModel
+import com.lamz.trackinv.data.model.SupplierModel
 import com.lamz.trackinv.data.pref.UserModel
 import com.lamz.trackinv.data.pref.UserPreference
 import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.auth.LoginResponse
-import com.lamz.trackinv.response.auth.RegisterResponse
-import com.lamz.trackinv.response.category.AddCategoryResponse
-import com.lamz.trackinv.response.category.GetAllCategoryResponse
-import com.lamz.trackinv.response.category.GetCategoryIdResponse
-import com.lamz.trackinv.response.membership.MembershipResponse
-import com.lamz.trackinv.response.partner.AddPartnerResponse
-import com.lamz.trackinv.response.partner.GetCustomerByidResponse
-import com.lamz.trackinv.response.partner.GetCustomerResponse
-import com.lamz.trackinv.response.partner.GetSupplierByidResponse
-import com.lamz.trackinv.response.partner.GetSupplierResponse
-import com.lamz.trackinv.response.product.AddProductResponse
-import com.lamz.trackinv.response.product.DeleteProductResponse
-import com.lamz.trackinv.response.product.GetProductByIdResponse
-import com.lamz.trackinv.response.product.GetProductResponse
-import com.lamz.trackinv.response.product.UpdateProductResponse
-import com.lamz.trackinv.response.transaksi.GetTransactionResponse
-import com.lamz.trackinv.response.transaksi.OutgoingResponse
+import com.lamz.trackinv.utils.FirebaseUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import retrofit2.HttpException
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-class TrackRepository private constructor(
+class TrackRepository(
     private val userPreference: UserPreference,
-    private val apiService: ApiService
-) {
+) : TrackRepositoryImpl {
+
+    private val database =
+        FirebaseDatabase.getInstance("https://track-inventory-app-default-rtdb.firebaseio.com/")
+    private val dbReferenceAuth = database.reference.child("data_users")
+
 
     suspend fun saveSession(user: UserModel) {
         userPreference.saveSession(user)
@@ -47,419 +43,92 @@ class TrackRepository private constructor(
         userPreference.logout()
     }
 
-    suspend fun registerAccount(email: String, password: String, username : String, namaToko : String, alamat : String) = liveData {
+    override suspend fun login(email: String, password: String): Flow<UiState<AuthModel>> = flow {
         emit(UiState.Loading)
         try {
-            val successResponse = apiService.register(email,password,username,namaToko, alamat)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, RegisterResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
+            val authModel = withContext(Dispatchers.IO) {
+                suspendCoroutine { continuation ->
+                    dbReferenceAuth.orderByChild("email").equalTo(email)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    for (account in snapshot.children) {
+                                        val dataAccount = account.getValue(AuthModel::class.java)
+                                        if (dataAccount != null && dataAccount.password == password) {
+                                            val authModel = AuthModel(
+                                                dataAccount.idUser,
+                                                dataAccount.nama,
+                                                dataAccount.email,
+                                                dataAccount.password,
+                                                dataAccount.username
+                                            )
+                                            continuation.resume(authModel)
+                                            return
+                                        }
+                                    }
+                                }
+                                continuation.resume(null)
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                continuation.resumeWithException(error.toException())
+                            }
+                        })
+                }
+            }
+            if (authModel != null) {
+                emit(UiState.Success(authModel))
+            } else {
+                emit(UiState.Error("User Not Found or Incorrect Password"))
+            }
         } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun login(email: String, password: String) = liveData {
-        emit(UiState.Loading)
-        try {
-            val successResponse = apiService.login(email,password)
-            emit(UiState.Success(successResponse))
-        }catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, LoginResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-    }
-
-    suspend fun addCategory(category : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.addCategory(category)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, AddCategoryResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun getCategory() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllCategory()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetAllCategoryResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun addProduct( name : String,stock : String,category : String,hargabeli : Int,hargaJual : Int,) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.addProduct(name, stock, category, hargabeli, hargaJual)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, AddProductResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun getCategoryId(id : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getCategoryId(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun updateCategory( id: String, name: String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.updateCategory(id,name)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun deleteCategory(id : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.deleteCategories(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetCategoryIdResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
+            emit(UiState.Error(e.message ?: "Unknown Error"))
         }
     }
 
-    suspend fun getProduct() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllProduct()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetProductResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
+    override suspend fun register(register: AuthModel) {
+        val userId = dbReferenceAuth.push().key!!
+        val userRef = dbReferenceAuth.child(userId)
+        userRef.setValue(register).await()
     }
 
-    suspend fun getProductId(id : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getProductId(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetProductByIdResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
+    override suspend fun addSupplier(supplier: SupplierModel) {
+        val supplierId = FirebaseUtils.dbSupplier.push().key!!
+        val supplierRef = FirebaseUtils.dbSupplier.child(supplierId)
+        supplierRef.setValue(supplier).await()
     }
 
-    suspend fun deleteProducts(id : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.deleteProdct(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, DeleteProductResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
+    override suspend fun getAllSupplier(idUser : String): Flow<List<SupplierModel>> {
+        val snapshot = FirebaseUtils.dbSupplier.orderByChild("idUser").equalTo(idUser).get().await()
+        return flowOf(snapshot.children.mapNotNull { it.getValue(SupplierModel::class.java) })
     }
 
-    suspend fun updateProduct( id : String, name : String,stock : String,category : String,hargabeli : Int,hargaJual : Int,) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.updateProduct(id,name, stock, category, hargabeli, hargaJual)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, UpdateProductResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
+    override suspend fun addCustomer(customer: CustomerModel) {
+        val customerId = FirebaseUtils.dbCustomer.push().key!!
+        val customerRef = FirebaseUtils.dbCustomer.child(customerId)
+        customerRef.setValue(customer).await()
     }
 
-    suspend fun getTransaction() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getTransaction()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetTransactionResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
+    override suspend fun getAllCustomer(idUser : String): Flow<List<CustomerModel>> {
+        val snapshot = FirebaseUtils.dbCustomer.orderByChild("idUser").equalTo(idUser).get().await()
+        return flowOf(snapshot.children.mapNotNull { it.getValue(CustomerModel::class.java) })
     }
 
-    suspend fun outgoingTran(partnerId : String, items : List<ItemsProduct>) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val outgoingRequest = OutGoing(partnerId, items)
-            val successResponse = apiService.outGoingTran(partnerId, outgoingRequest)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, OutgoingResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
+    override suspend fun addProduct(barang: BarangModel) {
+        val barangId = FirebaseUtils.dbBarang.push().key!!
+        val barangRef = FirebaseUtils.dbBarang.child(barangId)
+        barangRef.setValue(barang).await()
     }
 
-    suspend fun incomingTran(partnerId : String, items : List<ItemsProduct>) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val incomingRequest = OutGoing(partnerId, items)
-            val successResponse = apiService.incomingTran(partnerId, incomingRequest)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, OutgoingResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
+    override suspend fun getAllProduct(idUser: String): Flow<List<BarangModel>> {
+        val snapshot = FirebaseUtils.dbBarang.orderByChild("idUser").equalTo(idUser).get().await()
+        return flowOf(snapshot.children.mapNotNull { it.getValue(BarangModel::class.java) })
     }
 
-
-    suspend fun getCustomer() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllCustomer()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetCustomerResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
+    override suspend fun getProductId(idBarang: String): Flow<BarangModel> {
+        val snapshot = FirebaseUtils.dbBarang.orderByChild("idBarang").equalTo(idBarang).get().await()
+        val barang = snapshot.children.firstOrNull()?.getValue(BarangModel::class.java)
+        return  flowOf(barang ?:BarangModel())
     }
 
-    suspend fun addCustomer(name : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.addCustomer(name)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, AddPartnerResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun getCustomer(id : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllCustomer(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetCustomerByidResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-
-    suspend fun getSupplier() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllSupplier()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetSupplierResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun addSupplier(name : String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.addSupplier(name)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, AddPartnerResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun getSupplier(id: String) = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.getAllSupplier(id)
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, GetSupplierByidResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-
-    }
-
-    suspend fun membership() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.membership()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, MembershipResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-    }
-
-    suspend fun membershipTahun() = liveData {
-        emit(UiState.Loading)
-        try {
-            userPreference.getSession()
-            val user = runBlocking { userPreference.getSession().first() }
-            val apiService = ApiConfig.getApiService(user.token)
-            val successResponse = apiService.membershipTahun()
-            emit(UiState.Success(successResponse))
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, MembershipResponse::class.java)
-            emit(UiState.Error(errorResponse.toString()))
-        } catch (e: Exception) {
-            emit(UiState.Error("Error : ${e.message.toString()}"))
-        }
-    }
-
-    companion object {
-        @Volatile
-        private var instance: TrackRepository? = null
-        fun getInstance(
-            userPreference: UserPreference,
-            apiService: ApiService
-        ): TrackRepository =
-            instance ?: synchronized(this) {
-                instance ?: TrackRepository(userPreference, apiService)
-            }.also { instance = it }
-    }
 }

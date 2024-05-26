@@ -1,17 +1,13 @@
 package com.lamz.trackinv.ui.screen.home
 
 import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,19 +35,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.transaksi.GetTransactionResponse
+import com.lamz.trackinv.data.model.BarangModel
 import com.lamz.trackinv.ui.component.CardItem1
 import com.lamz.trackinv.ui.component.CardItem2
-import com.lamz.trackinv.ui.component.CardItemTransactions
 import com.lamz.trackinv.ui.component.TextItem
 import com.lamz.trackinv.ui.navigation.Screen
-import com.lamz.trackinv.ui.view.main.MainActivity
+import com.lamz.trackinv.utils.FirebaseUtils
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
@@ -65,9 +60,7 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     context: Context = LocalContext.current,
-    viewModel: HomeViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
+    viewModel: HomeViewModel = koinViewModel(),
     navController: NavHostController,
 ) {
 
@@ -75,39 +68,86 @@ fun HomeContent(
 
     var showDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
+    val isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
-    val uploadState by viewModel.upload.observeAsState()
-    val transactionState by viewModel.getTransaction.observeAsState()
 
+    val dbBarang = FirebaseUtils.dbBarang
+    var allProducts by remember { mutableStateOf(emptyList<BarangModel>()) }
+    var productTersedia by remember { mutableStateOf(0) }
+    var productMenipis by remember { mutableStateOf(0) }
+    var productHabis by remember { mutableStateOf(0) }
 
-
-    when (uploadState) {
-        is UiState.Loading -> {
-
-        }
-
-        is UiState.Success -> {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            (context as? ComponentActivity)?.finish()
-        }
-
-        is UiState.Error -> {
-
-        }
-
-        else -> {}
-    }
 
     LaunchedEffect(true) {
-        viewModel.getAllProductsMenipis()
-        viewModel.getTransaction()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
+
+        val query = dbBarang.orderByChild("stokBarang").startAt("50")
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val tempList = mutableListOf<BarangModel>()
+                productTersedia = 0
+
+                for (barangSnapshot in snapshot.children) {
+                    val barang = barangSnapshot.getValue(BarangModel::class.java)
+                    if (barang != null) {
+                        tempList.add(barang)
+                        productTersedia++
+                    }
+                }
+                allProducts = tempList
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Gagal membaca data barang", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        dbBarang.orderByChild("stokBarang").startAt("0").endAt("49")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val tempList = mutableListOf<BarangModel>()
+                    productMenipis = 0 // Reset productMenipis before update
+
+                    for (barangSnapshot in snapshot.children) {
+                        val barang = barangSnapshot.getValue(BarangModel::class.java)
+                        if (barang != null) {
+                            tempList.add(barang)
+                            if ((barang.stokBarang?.toInt() ?: 0) < 50) {
+                                productMenipis++ // Increment if stock is less than 50
+                            }
+                        }
+                    }
+                    allProducts = tempList
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(context, "Gagal membaca data barang", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        val query2 = dbBarang.orderByChild("stokBarang").equalTo("0")
+        query2.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val tempList = mutableListOf<BarangModel>()
+                productHabis = 0 // Reset productHabis before update
+
+                for (barangSnapshot in snapshot.children) {
+                    val barang = barangSnapshot.getValue(BarangModel::class.java)
+                    if (barang != null) {
+                        tempList.add(barang)
+                        productHabis++ // Increment if stock is 0
+                    }
+                }
+                allProducts = tempList
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Gagal membaca data barang", Toast.LENGTH_SHORT).show()
+            }
+        })
+
     }
 
     TopAppBar(
@@ -180,27 +220,42 @@ fun HomeContent(
             horizontalArrangement = Arrangement.Center
         ) {
 
-            val productTersedia by viewModel.stokTersedia.observeAsState(emptyList())
-            val productMenipis by viewModel.stokMenipis.observeAsState(emptyList())
-            val productHabis by viewModel.stokhabis.observeAsState(emptyList())
 
-            CardItem1(R.drawable.ic_stok_tersedia,productTersedia.size.toString(), stringResource(id = R.string.tersedia))
-            CardItem1(R.drawable.ic_menipis,productMenipis.size.toString() , stringResource(id = R.string.menipis))
-            CardItem1(R.drawable.ic_stok_habis, productHabis.size.toString() ,stringResource(id = R.string.habis))
+            CardItem1(
+                R.drawable.ic_stok_tersedia,
+                productTersedia.toString(),
+                stringResource(id = R.string.tersedia)
+            )
+            CardItem1(
+                R.drawable.ic_menipis,
+                productMenipis.toString(),
+                stringResource(id = R.string.menipis)
+            )
+            CardItem1(
+                R.drawable.ic_stok_habis,
+                productHabis.toString(),
+                stringResource(id = R.string.habis)
+            )
         }
 
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            CardItem2(R.drawable.ic_stok_masuk, stringResource(id = R.string.stok_masuk), modifier = Modifier.clickable {
-                navController.navigate(Screen.Supplier.route)
-            })
+            CardItem2(
+                R.drawable.ic_stok_masuk,
+                stringResource(id = R.string.stok_masuk),
+                modifier = Modifier.clickable {
+                    navController.navigate(Screen.Supplier.route)
+                })
 
 
-            CardItem2(R.drawable.ic_stok_keluar, stringResource(id = R.string.stok_keluar), modifier = Modifier.clickable {
-                navController.navigate(Screen.Customer.route)
-            })
+            CardItem2(
+                R.drawable.ic_stok_keluar,
+                stringResource(id = R.string.stok_keluar),
+                modifier = Modifier.clickable {
+                    navController.navigate(Screen.Customer.route)
+                })
 
 
         }
@@ -210,27 +265,6 @@ fun HomeContent(
             fontWeight = FontWeight.SemiBold,
             fontSize = 24.sp,
         )
-
-        LazyColumn(state = rememberLazyListState()) {
-            when (transactionState) {
-                is UiState.Success -> {
-                    val transactions = (transactionState as UiState.Success<GetTransactionResponse>).data.data
-                        .sortedByDescending { it.createdAt } // Urutkan berdasarkan waktu transaksi secara descending
-
-                    items(transactions.reversed()) { tran ->
-                        CardItemTransactions(
-                            type = tran.type,
-                            nama = tran.partner.name,
-                            tipe = tran.partner.type,
-                            waktu = tran.createdAt,
-                            harga = tran.totalHarga.toString()
-                        )
-                    }
-                }
-                else -> {}
-            }
-        }
-
     }
 
 

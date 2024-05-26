@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Delete
@@ -42,7 +42,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,17 +59,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import com.lamz.trackinv.R
-import com.lamz.trackinv.ViewModelFactory
-import com.lamz.trackinv.data.di.Injection
-import com.lamz.trackinv.helper.UiState
-import com.lamz.trackinv.response.category.GetAllCategoryResponse
+import com.lamz.trackinv.data.model.KategoriModel
 import com.lamz.trackinv.ui.navigation.Screen
 import com.lamz.trackinv.ui.view.main.MainActivity
+import com.lamz.trackinv.utils.FirebaseUtils
 
 @Composable
 fun AddScreen(
@@ -99,83 +101,120 @@ fun AddScreen(
 fun AddContent(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: AddViewModel = viewModel(
-        factory = ViewModelFactory(Injection.provideRepository(context))
-    ),
     navigateToDetail: (String) -> Unit,
     navController: NavHostController,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
     var showUpdate by remember { mutableStateOf(false) }
-    val deleteState by viewModel.delete.observeAsState()
-    val updateState by viewModel.updateCategory.observeAsState()
+    var addCategory by remember { mutableStateOf("") }
+    var categoryId  by remember { mutableStateOf("") }
     var showCategory by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     val wasFocused = remember { isFocused }
     var categoryName by remember { mutableStateOf("") }
+    val dbKategori = FirebaseUtils.dbCategory
+    var categories by remember { mutableStateOf(emptyList<KategoriModel>()) }
 
-    val uploadState by viewModel.upload.observeAsState()
-    val categoryState by viewModel.getCategory.observeAsState()
     val listState = rememberLazyListState()
 
+    val  fetchCategories : () -> Unit = {
+        dbKategori.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val tempList = mutableListOf<KategoriModel>()
 
-
-    // Menanggapi perubahan nilai upload
-    when (uploadState) {
-        is UiState.Loading -> {
-
-        }
-
-        is UiState.Success -> {
-            showCategory = false
-            Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.Add.route){
-                popUpTo(Screen.Home.route)
+                for (categorySnapshot in snapshot.children) {
+                    val category = categorySnapshot.getValue(KategoriModel::class.java)
+                    if (category != null) {
+                        tempList.add(category)
+                    }
+                }
+                categories = tempList
             }
-        }
 
-        is UiState.Error -> {
-            Toast.makeText(context, "Tingkatkan limit mu", Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.Membership.route){
-                popUpTo(0)
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Gagal membaca data kategori", Toast.LENGTH_SHORT).show()
             }
-        }
+        })
+    }
+    val deleteCategories : (String) -> Unit = { idKategori ->
+        val akunQuery: Query = dbKategori.orderByChild("idKategori").equalTo(idKategori)
+        akunQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (snapshot in dataSnapshot.children) {
+                    snapshot.ref.removeValue()
+                    showDelete = false
+                    Toast.makeText(context, "Berhasil menghapus kategori", Toast.LENGTH_SHORT).show()
+                    navController.navigate(Screen.Add.route){
+                        popUpTo(Screen.Home.route)
+                    }
+                }
+                Toast.makeText(
+                    context,
+                    "Data Kategori berhasil dihapus",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
-        else -> {}
+            override fun onCancelled(databaseError: DatabaseError) {
+                Toast.makeText(
+                    context,
+                    "Gagal menghapus data kategori: ${databaseError.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
     }
 
-    when (deleteState){
+    val editCategory : (String, String) -> Unit = { idKategori, newCategoryName ->
 
-        is UiState.Success -> {
-            showDelete = false
-            Toast.makeText(context, "Berhasil menghapus kategori", Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.Add.route){
-                popUpTo(Screen.Home.route)
+        val query: Query = dbKategori.orderByChild("idKategori").equalTo(idKategori)
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        val key = snap.key
+                        if (key != null) {
+                            val updatedCategory = KategoriModel(idKategori, newCategoryName)
+                            dbKategori.child(key).setValue(updatedCategory)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(
+                                            context,
+                                            "Data kategori berhasil diperbarui",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                        showUpdate = false
+                                        Toast.makeText(context, "Berhasil mengubah data kategori", Toast.LENGTH_SHORT).show()
+                                        navController.navigate(Screen.Add.route){
+                                            popUpTo(Screen.Home.route)
+                                        }
+                                    }
+                                }
+                        }
+                    }
+                }
             }
-        }
 
-        else -> {}
-    }
-
-    when (updateState){
-
-        is UiState.Success -> {
-            showDelete = false
-            Toast.makeText(context, "Berhasil mengubah data kategori", Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.Add.route){
-                popUpTo(Screen.Home.route)
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+                Toast.makeText(
+                    context,
+                    "Gagal mengubah data kategori: ${error.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        }
 
-        else -> {}
+        })
+
     }
 
 
 
     LaunchedEffect(true) {
-        viewModel.getCategory()
+        fetchCategories()
         if (wasFocused) {
             focusRequester.requestFocus()
         }
@@ -206,7 +245,7 @@ fun AddContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Category,
-                            contentDescription = "Cancel",
+                            contentDescription = "Add Category",
                             tint = colorResource(id = R.color.Yellow),
                             modifier = Modifier
                                 .size(36.dp)
@@ -244,7 +283,7 @@ fun AddContent(
                 text = {
                     val containerColor = colorResource(id = R.color.lavender)
                     OutlinedTextField(
-                        value = viewModel.addCategory,
+                        value = addCategory,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = containerColor,
                             unfocusedContainerColor = containerColor,
@@ -254,7 +293,7 @@ fun AddContent(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         singleLine = true,
                         onValueChange = { newInput ->
-                            viewModel.addCategory = newInput
+                            addCategory = newInput
                         },
                         shape = RoundedCornerShape(size = 20.dp),
                         modifier = Modifier
@@ -268,7 +307,25 @@ fun AddContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.addCategory(viewModel.addCategory)
+                            val idKategori = dbKategori.push().key!!
+                                  val kategori = KategoriModel(
+                                      idKategori,
+                                      addCategory
+                                  )
+
+                            dbKategori.child(idKategori).setValue(kategori)
+                                .addOnCompleteListener {
+                                    showCategory = false
+                                    Toast.makeText(context, "Berhasil menambah kategori", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(Screen.Add.route) {
+                                        popUpTo(Screen.Home.route)
+                                    }
+
+                                    }
+                                .addOnFailureListener {
+
+                                    Toast.makeText(context, "Gagal menambah data kategori: ${it.message}", Toast.LENGTH_SHORT).show()
+                                }
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)
@@ -341,19 +398,7 @@ fun AddContent(
             state = listState, contentPadding = PaddingValues(bottom = 120.dp),
             modifier = Modifier.padding(top = 48.dp)
         ) {
-            // Observe the LiveData for category data
 
-
-            when (categoryState) {
-                is UiState.Loading -> {
-                    // Display loading indicator if needed
-                }
-
-                is UiState.Success -> {
-                    val categories =
-                        (categoryState as UiState.Success<GetAllCategoryResponse>).data.data
-
-                    // Display each category in LazyColumn
                     items(categories) { category ->
                         Card(
                             modifier = Modifier
@@ -371,7 +416,7 @@ fun AddContent(
                                     .padding(start = 25.dp, end = 25.dp)
                             ) {
                                 Text(
-                                    text = category.name,
+                                    text = category.namaKategori!!,
                                     fontSize = 15.sp,
                                     fontStyle = FontStyle.Normal,
                                     fontWeight = FontWeight.Bold,
@@ -389,8 +434,9 @@ fun AddContent(
                                         modifier = modifier
                                             .padding(start = 8.dp)
                                             .clickable {
-                                                viewModel.categoryId = category.id
-                                                showDelete = true}
+                                                categoryId = category.idKategori!!
+                                                showDelete = true
+                                            }
                                     )
                                     Image(
                                         imageVector = Icons.Default.ModeEdit, contentDescription = null,
@@ -398,16 +444,17 @@ fun AddContent(
                                         modifier = modifier
                                             .padding(start = 8.dp)
                                             .clickable {
-                                                viewModel.categoryId = category.id
-                                                categoryName = category.name
-                                                showUpdate = true }
+                                                categoryId = category.idKategori!!
+                                                categoryName = category.namaKategori
+                                                showUpdate = true
+                                            }
                                     )
                                     Image(
-                                        imageVector = Icons.Default.ArrowForwardIos, contentDescription = null,
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null,
                                         colorFilter = ColorFilter.tint(Color.Black),
                                         modifier = modifier
                                             .padding(start = 8.dp)
-                                            .clickable { navigateToDetail(category.id) }
+                                            .clickable { navigateToDetail(category.namaKategori) }
                                     )
                                 }
 
@@ -429,20 +476,14 @@ fun AddContent(
                         }
                     }
 
-                }
 
-                is UiState.Error -> {
-                    // Handle error state if needed
-                }
 
-                else -> {}
             }
         }
 
         if (showDelete) {
             AlertDialog(
                 onDismissRequest = {
-                    // Handle dialog dismissal if needed
                     showDelete = false
                 },
                 title = {
@@ -454,7 +495,7 @@ fun AddContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.deleteCategory(viewModel.categoryId)
+                            deleteCategories(categoryId)
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)
@@ -481,7 +522,6 @@ fun AddContent(
         if (showUpdate) {
             AlertDialog(
                 onDismissRequest = {
-                    // Handle dialog dismissal if needed
                     showCategory = false
                 },
                 title = {
@@ -514,7 +554,7 @@ fun AddContent(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.editCategory(viewModel.categoryId, categoryName)
+                            editCategory(categoryId, categoryName)
                         },
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = colorResource(id = R.color.Yellow)
@@ -537,6 +577,12 @@ fun AddContent(
                 }
             )
         }
-    }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewAddScreen() {
+    AddContent(navigateToDetail = {}, navController = rememberNavController())
+}
+
 
