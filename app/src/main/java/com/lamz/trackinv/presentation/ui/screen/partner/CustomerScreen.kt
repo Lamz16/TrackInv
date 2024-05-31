@@ -213,17 +213,14 @@ fun CustomerContent(
                 confirmButton = {
                     Button(
                         onClick = {
+                            val idCustomer = FirebaseUtils.dbCustomer.push().key!!
                             if (addCustomer.isNotEmpty()){
-                                val idCustomer = FirebaseUtils.dbCustomer.push().key!!
-
                                     viewModel.addCustomer(
                                         CustomerModel(
                                             idCustomer,
                                             addCustomer
                                         )
                                     )
-
-
                                 showLoading = true
                             }
                         },

@@ -18,8 +18,7 @@
     <string name="pilih_customer">Pilih customer</string>
     <string name="pilih_supplier">Pilih supplier</string>
     <string name="harga_jual">Harga Jual</string>
-    <string name="menu_chatbot">Chatbot</string>
-    <string name="masuk">Masuk</string>
+    <string name="menu_prediction">Prediction</string>
     <string name="tran_masuk">"- Rp. %s"</string>
     <string name="tran_keluar">+ Rp. %s</string>
 </resources>

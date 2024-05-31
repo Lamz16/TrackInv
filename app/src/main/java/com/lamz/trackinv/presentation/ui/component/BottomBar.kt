@@ -49,8 +49,8 @@ fun BottomBar(
                 screen = Screen.Transactions
             ),
             NavigationItem(
-                title = stringResource(R.string.menu_chatbot),
-                icon = ImageBitmap.imageResource(id = R.drawable.chat),
+                title = stringResource(R.string.menu_prediction),
+                icon = ImageBitmap.imageResource(id = R.drawable.ic_predictive),
                 screen = Screen.Chatbot
             ),
 
@@ -70,7 +70,7 @@ fun BottomBar(
                 onClick = {
                     navController.navigate(item.screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            saveState = false
                         }
                         restoreState = true
                         launchSingleTop = true

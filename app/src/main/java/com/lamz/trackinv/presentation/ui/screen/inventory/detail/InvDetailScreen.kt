@@ -92,7 +92,6 @@ fun InvDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvDetailContent(
-    modifier: Modifier = Modifier,
     inventory: BarangModel,
     navController: NavHostController,
     viewModel: InventoryViewModel = hiltViewModel(),

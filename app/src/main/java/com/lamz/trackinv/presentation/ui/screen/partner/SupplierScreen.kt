@@ -55,8 +55,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.presentation.model.partner.PartnerViewModel
@@ -69,7 +67,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun SupplierScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
     navigateToDetail: (String) -> Unit,
     viewModel: PartnerViewModel = hiltViewModel(),
 ) {
@@ -227,9 +224,8 @@ fun SupplierContent(
                 confirmButton = {
                     Button(
                         onClick = {
+                            val idSupplier = FirebaseUtils.dbSupplier.push().key!!
                             if (addSupplier.isNotEmpty()){
-                                val idSupplier = FirebaseUtils.dbSupplier.push().key!!
-
                                     viewModel.addSupplier(
                                         SupplierModel(
                                             idSupplier,
@@ -361,7 +357,7 @@ fun SupplierContent(
                         CardCategoryItem(
                             nameCategory = it,
                             modifier = Modifier.clickable {
-                                supplier.namaSupp?.let { it1 -> navigateToDetail(it1) }
+                                navigateToDetail(supplier.namaSupp)
                             })
                     }
                 }

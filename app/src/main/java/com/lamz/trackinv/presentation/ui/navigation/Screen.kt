@@ -1,25 +1,22 @@
 package com.lamz.trackinv.presentation.ui.navigation
 
 sealed class Screen(val route: String) {
-    object Splash: Screen("splash")
-    object Home : Screen("home")
-    object Inventory : Screen("inventory")
-    object Customer : Screen("customer")
-    object Out : Screen("customer/{idCustomer}"){
+    data object Home : Screen("home")
+    data object Inventory : Screen("inventory")
+    data object Customer : Screen("customer")
+    data object Out : Screen("customer/{idCustomer}"){
         fun createRoute(idCustomer: String) = "customer/$idCustomer"
     }
 
-    object Supplier : Screen("supplier")
-    object In : Screen("supplier/{idSupplier}"){
+    data object Supplier : Screen("supplier")
+    data object In : Screen("supplier/{idSupplier}"){
         fun createRoute(idSupplier: String) = "supplier/$idSupplier"
     }
-    object Transactions : Screen("transactions")
-    object Chatbot : Screen("chatbot")
-    object Add : Screen("Add")
-    object Membership : Screen("Membership")
-    object AddProduct : Screen("Add/{categoryId}"){
-        fun createRoute(categoryId: String) = "add/$categoryId" }
-    object DetailInventory : Screen("inventory/{inventoryId}") {
+    data object Transactions : Screen("transactions")
+    data object Chatbot : Screen("chatbot")
+    data object Add : Screen("Add")
+    data object Membership : Screen("Membership")
+    data object DetailInventory : Screen("inventory/{inventoryId}") {
         fun createRoute(inventoryId: String) = "inventory/$inventoryId"
     }
 }

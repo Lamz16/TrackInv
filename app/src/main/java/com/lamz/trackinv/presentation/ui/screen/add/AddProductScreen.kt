@@ -77,7 +77,6 @@ fun AddProductScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductContent(
-    modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
     navController: NavHostController,
     viewModel: AddProductViewModel = hiltViewModel()

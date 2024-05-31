@@ -69,7 +69,7 @@ fun TrackInvApp(
                 route = Screen.DetailInventory.route,
                 arguments = listOf(navArgument("inventoryId") { type = NavType.StringType })
             ) {
-                // Composable function for registration screen
+
                 val inventoryId = it.arguments?.getString("inventoryId") ?: " "
                 InvDetailScreen(
                     inventoryId = inventoryId,
@@ -103,7 +103,7 @@ fun TrackInvApp(
             }
 
             composable(route = Screen.Supplier.route){
-                SupplierScreen(navController = navController,
+                SupplierScreen(
                     navigateToDetail = { idSupplier ->
                         navController.navigate(Screen.In.createRoute(idSupplier))
                     })
