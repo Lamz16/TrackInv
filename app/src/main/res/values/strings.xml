@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TrackInv</string>
-    <string name="last_update">Last Update</string>
+    <string name="last_update">Update Terbaru</string>
     <string name="tersedia">Stok tersedia</string>
     <string name="menipis">Stok Menipis</string>
     <string name="habis">Stok Habis</string>
@@ -8,24 +8,18 @@
     <string name="stok_keluar">Stok Keluar</string>
     <string name="stok">Stok</string>
     <string name="harga_beli">Harga Beli</string>
-    <string name="pieces">%s pcs</string>
     <string name="id_inventory">Rp. %s</string>
-    <string name="login">Login</string>
-    <string name="to_register">No account?\u0020</string>
-    <string name="or">Or\u0020</string>
-    <string name="register">Register</string>
     <string name="menu_home">Home</string>
     <string name="menu_inventory">Inventory</string>
-    <string name="menu_profile">Account</string>
     <string name="menu_transactions">Transaksi</string>
-    <string name="title_activity_welcome">WelcomeActivity</string>
-    <string name="daftar_barang">Daftar Barang</string>
     <string name="tambah_barang">Tambah Barang</string>
     <string name="detail_barang">Detail Barang %s</string>
     <string name="kategori">Kategori</string>
-    <string name="title_activity_add">AddActivity</string>
     <string name="pilih_customer">Pilih customer</string>
     <string name="pilih_supplier">Pilih supplier</string>
-    <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="harga_jual">Harga Jual</string>
+    <string name="menu_chatbot">Chatbot</string>
+    <string name="masuk">Masuk</string>
+    <string name="tran_masuk">"- Rp. %s"</string>
+    <string name="tran_keluar">+ Rp. %s</string>
 </resources>

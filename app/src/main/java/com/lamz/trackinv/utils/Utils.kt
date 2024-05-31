@@ -19,6 +19,13 @@ fun convertStringToCalendar(dateTimeString: String): Calendar {
     return calendar
 }
 
+fun getFormattedCurrentDate(): String {
+    val calendar = Calendar.getInstance()
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    return dateFormat.format(calendar.time)
+}
+
+
 fun formatToCurrency(value: String): String {
     val cleanString = value.replace("[^\\d]".toRegex(), "")
 

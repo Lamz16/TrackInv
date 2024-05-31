@@ -1,7 +1,9 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-parcelize")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.dagger.hilt.android)
     id("com.google.gms.google-services")
 }
 
@@ -44,7 +46,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -55,51 +57,48 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.compose.foundation:foundation")
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    implementation("androidx.wear.compose:compose-material:1.3.1")
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(libs.core.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.activity.compose)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.ui)
+    implementation(libs.ui.graphics)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.material3)
+    implementation(libs.foundation)
+    implementation(libs.compose.material)
+    implementation(libs.firebase.database)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.ui.test.junit4)
+    debugImplementation(libs.ui.tooling)
+    debugImplementation(libs.ui.test.manifest)
 
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+    implementation(libs.lifecycle.runtime.compose)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+    implementation(libs.lifecycle.viewmodel.compose)
 
-    implementation("androidx.compose.runtime:runtime:1.6.7")
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.7")
-    implementation("androidx.compose.runtime:runtime-rxjava2:1.6.7")
+    implementation(libs.runtime)
+    implementation(libs.runtime.livedata)
+    implementation(libs.runtime.rxjava2)
 
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.navigation.compose)
 
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
-    implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation(libs.datastore.preferences)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.material.icons.extended)
 
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation(libs.lifecycle.runtime.ktx.v280)
 
 
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.kotlinx.coroutines.android)
 
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-    implementation("io.insert-koin:koin-core:3.5.3")
-    implementation("io.insert-koin:koin-android:3.5.3")
-    implementation ("io.insert-koin:koin-androidx-compose:3.5.3")
-
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }
