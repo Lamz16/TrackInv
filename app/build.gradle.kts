@@ -88,9 +88,6 @@ dependencies {
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.material.icons.extended)
 
-    implementation(libs.lifecycle.runtime.ktx.v280)
-
-
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.kotlinx.coroutines.android)
 

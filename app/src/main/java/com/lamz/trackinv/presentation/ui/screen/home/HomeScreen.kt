@@ -47,7 +47,7 @@ import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.model.home.HomeViewModel
 import com.lamz.trackinv.presentation.ui.component.CardItem1
 import com.lamz.trackinv.presentation.ui.component.CardItem2
-import com.lamz.trackinv.presentation.ui.component.CardItemTransactions
+import com.lamz.trackinv.presentation.ui.component.CardItemTransactionsUpdate
 import com.lamz.trackinv.presentation.ui.component.TextItem
 import com.lamz.trackinv.presentation.ui.navigation.Screen
 import com.lamz.trackinv.presentation.ui.state.UiState
@@ -246,7 +246,7 @@ fun HomeContent(
                 }
             }else{
                 items(allTransactions) { transactions ->
-                    CardItemTransactions(
+                    CardItemTransactionsUpdate(
                         nama = transactions.namaBarang ?: "",
                         waktu = transactions.tglTran ?: "",
                         harga = transactions.nominal ?: "",

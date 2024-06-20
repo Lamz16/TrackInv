@@ -39,6 +39,7 @@ import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.model.transactions.TransactionViewModel
 import com.lamz.trackinv.presentation.ui.component.CardItemTransactions
+import com.lamz.trackinv.presentation.ui.component.CardItemTransactionsUpdate
 import com.lamz.trackinv.presentation.ui.component.SearchBar
 import com.lamz.trackinv.presentation.ui.state.UiState
 import kotlinx.coroutines.delay

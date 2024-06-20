@@ -1,5 +1,3 @@
-@file:JvmName("CardItemTransactionsUpdateKt")
-
 package com.lamz.trackinv.presentation.ui.component
 
 import androidx.compose.foundation.Image
@@ -37,7 +35,7 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun CardItemTransactions(
+fun CardItemTransactionsUpdate(
     type: String,
     nama: String,
     harga: String,
@@ -128,10 +126,16 @@ fun CardItemTransactions(
                     text = tipe
                 )
                 Text(
-                    text = waktu
+                    text = "$dayOfMonth-$month-$year"
                 )
             }
         }
 
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CardtransactionsPreview() {
+    CardItemTransactionsUpdate("Keluar", "John Doe", "9000", "customer", "2020-11-01T00:00:00.000Z")
 }
