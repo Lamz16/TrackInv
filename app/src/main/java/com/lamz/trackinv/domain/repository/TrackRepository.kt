@@ -4,6 +4,7 @@ import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.model.CustomerModel
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
+import com.lamz.trackinv.presentation.ui.state.UiState
 import kotlinx.coroutines.flow.Flow
 
 interface TrackRepository {
@@ -21,6 +22,6 @@ interface TrackRepository {
     suspend fun updateStock(idBarang: String, newStock: Int)
     suspend fun addTransactionStock(transaksi : TransaksiModel)
 
-    fun getAllTransaction() : Flow<List<TransaksiModel>>
-    fun getAllUpdatedTransaction() : Flow<List<TransaksiModel>>
+    fun getAllTransaction() : Flow<UiState<List<TransaksiModel>>>
+    fun getAllUpdatedTransaction() : Flow<UiState<List<TransaksiModel>>>
 }

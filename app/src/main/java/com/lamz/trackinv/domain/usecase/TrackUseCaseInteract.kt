@@ -5,6 +5,7 @@ import com.lamz.trackinv.domain.model.CustomerModel
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.domain.repository.TrackRepository
+import com.lamz.trackinv.presentation.ui.state.UiState
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -65,11 +66,11 @@ class TrackUseCaseInteract @Inject constructor(
         repository.addTransactionStock(transaksi)
     }
 
-    override fun getAllTransaction(): Flow<List<TransaksiModel>> {
+    override fun getAllTransaction(): Flow<UiState<List<TransaksiModel>>> {
         return repository.getAllTransaction()
     }
 
-    override fun getAllUpdatedTransaction(): Flow<List<TransaksiModel>> {
+    override fun getAllUpdatedTransaction(): Flow<UiState<List<TransaksiModel>>> {
         return repository.getAllUpdatedTransaction()
     }
 

@@ -5,10 +5,13 @@ import com.lamz.trackinv.domain.model.CustomerModel
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.domain.repository.TrackRepository
+import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.utils.FirebaseUtils
 import com.lamz.trackinv.utils.getFormattedCurrentDate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -90,16 +93,27 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
         transaksiRef.setValue(transaksi).await()
     }
 
-    override fun getAllTransaction(): Flow<List<TransaksiModel>> = flow {
-        val snapshot = FirebaseUtils.dbTransaksi.get().await()
-        val transactionList = snapshot.children.mapNotNull { it.getValue(TransaksiModel::class.java) }
-        emit(transactionList)
-    }
+    override fun getAllTransaction(): Flow<UiState<List<TransaksiModel>>> = flow {
+        emit(UiState.Loading)
+        try {
+            val snapshot = FirebaseUtils.dbTransaksi.get().await()
+            val transactionList = snapshot.children.mapNotNull { it.getValue(TransaksiModel::class.java) }
+            emit(UiState.Success(transactionList))
+        }catch (e : Exception){
+            emit(UiState.Error(e.message.toString()))
+        }
 
-    override fun getAllUpdatedTransaction(): Flow<List<TransaksiModel>> = flow {
-        val currentDate = getFormattedCurrentDate()
-        val snapshot = FirebaseUtils.dbTransaksi.orderByChild("tglTran").equalTo(currentDate).get().await()
-        val transactionList = snapshot.children.mapNotNull { it.getValue(TransaksiModel::class.java) }
-        emit(transactionList)
-    }
+    }.flowOn(Dispatchers.IO)
+
+    override fun getAllUpdatedTransaction(): Flow<UiState<List<TransaksiModel>>> = flow {
+        emit(UiState.Loading)
+        try {
+            val currentDate = getFormattedCurrentDate()
+            val snapshot = FirebaseUtils.dbTransaksi.orderByChild("tglTran").equalTo(currentDate).get().await()
+            val transactionList = snapshot.children.mapNotNull { it.getValue(TransaksiModel::class.java) }
+            emit(UiState.Success(transactionList))
+        }catch (e : Exception){
+            emit(UiState.Error(e.message.toString()))
+        }
+    }.flowOn(Dispatchers.IO)
 }

@@ -25,7 +25,7 @@ class TransactionViewModel @Inject constructor(private val useCase: TrackInvUseC
                     _getTransState.value = UiState.Error(it.message.toString())
                 }
                 .collect {
-                    _getTransState.value = UiState.Success(it)
+                    _getTransState.value = it
                 }
         }
     }

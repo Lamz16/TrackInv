@@ -1,5 +1,6 @@
 package com.lamz.trackinv.presentation.ui.screen.transactions
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -130,6 +131,7 @@ fun TransactionsContent(
                 }
             }else{
                 items(filteredTransactions) { transactions ->
+                    Log.d("Data Transaksi", "TransactionsContent: $transactions")
                     CardItemTransactions(
                         nama = transactions.namaBarang ?: "",
                         waktu = transactions.tglTran ?: "",
