@@ -12,13 +12,18 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +43,9 @@ import com.lamz.trackinv.presentation.model.inventory.InventoryViewModel
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.presentation.ui.theme.black40
 import com.lamz.trackinv.presentation.ui.view.main.ui.theme.TrackInvTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +53,15 @@ import com.lamz.trackinv.presentation.ui.view.main.ui.theme.TrackInvTheme
 fun PrediksiScreen(
     viewModel: InventoryViewModel = hiltViewModel(),
 ) {
+    val selectedDateLabelFrom = remember { mutableStateOf("-") }
+    val openDialogFrom = remember { mutableStateOf(false) }
+    val selectedDateFrom = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
+
+    val selectedDateLabelTo = remember { mutableStateOf("-") }
+    val openDialogTo = remember { mutableStateOf(false) }
+    val selectedDateTo = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
+
+    val showAlert = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -65,21 +82,158 @@ fun PrediksiScreen(
 
         dropDownMenu(viewModel = viewModel)
 
-        Card {
+        Text(
+            text = "Pilih Periode : ",
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(16.dp)
+        )
 
+        Row {
+            Text(
+                text = selectedDateLabelFrom.value,
+                color = black40,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable { openDialogFrom.value = true }
+            )
+
+            Text(
+                text = "Hingga",
+                color = black40,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+
+            Text(
+                text = selectedDateLabelTo.value,
+                color = black40,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable { openDialogTo.value = true }
+            )
         }
 
-    }
+        if (showAlert.value) {
+            Text(
+                text = "Jarak antara tanggal From dan To maksimal 7 hari.",
+                color = Color.Red,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
 
+        getFromDate(
+            isOpen = openDialogFrom.value,
+            onDismissRequest = { openDialogFrom.value = false },
+            onDateSelected = {
+                selectedDateLabelFrom.value = it.convertMillisToDate()
+                openDialogFrom.value = false
+                showAlert.value = false
+            },
+            selectedDate = selectedDateFrom
+        )
+
+        getToDate(
+            isOpen = openDialogTo.value,
+            onDismissRequest = { openDialogTo.value = false },
+            onDateSelected = {
+                val fromDateMillis = selectedDateFrom.selectedDateMillis
+                val toDateMillis = it
+                if (fromDateMillis != null && toDateMillis - fromDateMillis > 7 * 24 * 60 * 60 * 1000) {
+                    showAlert.value = true
+                } else {
+                    selectedDateLabelTo.value = it.convertMillisToDate()
+                    showAlert.value = false
+                }
+                openDialogTo.value = false
+            },
+            selectedDate = selectedDateTo
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun getFromDate(
+    isOpen: Boolean,
+    onDismissRequest: () -> Unit,
+    onDateSelected: (Long) -> Unit,
+    selectedDate: DatePickerState
+) {
+    if (isOpen) {
+        DatePickerDialog(
+            onDismissRequest = onDismissRequest,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDateMillis = selectedDate.selectedDateMillis
+                        if (selectedDateMillis != null) {
+                            onDateSelected(selectedDateMillis)
+                        }
+                    }
+                ) {
+                    Text("OK", color = black40)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text("Cancel", color = black40)
+                }
+            }
+        ) {
+            DatePicker(state = selectedDate)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun getToDate(
+    isOpen: Boolean,
+    onDismissRequest: () -> Unit,
+    onDateSelected: (Long) -> Unit,
+    selectedDate: DatePickerState
+) {
+    if (isOpen) {
+        DatePickerDialog(
+            onDismissRequest = onDismissRequest,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDateMillis = selectedDate.selectedDateMillis
+                        if (selectedDateMillis != null) {
+                            onDateSelected(selectedDateMillis)
+                        }
+                    }
+                ) {
+                    Text("OK", color = black40)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text("Cancel", color = black40)
+                }
+            }
+        ) {
+            DatePicker(state = selectedDate)
+        }
+    }
 }
 
 @Composable
-private fun dropDownMenu(viewModel: InventoryViewModel){
-
+private fun dropDownMenu(viewModel: InventoryViewModel) {
     val uiState by viewModel.getInventoryState.collectAsStateWithLifecycle()
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<String?>(null) }
-    
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(16.dp)
@@ -94,7 +248,7 @@ private fun dropDownMenu(viewModel: InventoryViewModel){
                 .height(36.dp)
                 .clickable { expanded = true }
         )
-        Column{
+        Column {
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Dropdown arrow",
@@ -124,12 +278,19 @@ private fun dropDownMenu(viewModel: InventoryViewModel){
                         }
                     }
                 }
-
             }
         }
-
     }
 }
+
+fun Long.convertMillisToDate(): String {
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = this@convertMillisToDate
+    }
+    val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.US)
+    return sdf.format(calendar.time)
+}
+
 
 @Composable
 @Preview
