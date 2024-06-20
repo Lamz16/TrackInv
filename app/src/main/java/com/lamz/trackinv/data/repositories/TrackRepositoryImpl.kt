@@ -1,4 +1,4 @@
-package com.lamz.trackinv.data
+package com.lamz.trackinv.data.repositories
 
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.model.CustomerModel

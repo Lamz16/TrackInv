@@ -1,6 +1,6 @@
 package com.lamz.trackinv.di
 
-import com.lamz.trackinv.data.TrackRepositoryImpl
+import com.lamz.trackinv.data.repositories.TrackRepositoryImpl
 import com.lamz.trackinv.domain.repository.TrackRepository
 import dagger.Binds
 import dagger.Module

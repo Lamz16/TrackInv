@@ -16,7 +16,7 @@ import androidx.navigation.navArgument
 import com.lamz.trackinv.presentation.ui.component.BottomBar
 import com.lamz.trackinv.presentation.ui.navigation.Screen
 import com.lamz.trackinv.presentation.ui.screen.add.AddProductScreen
-import com.lamz.trackinv.presentation.ui.screen.chatbot.ChatBotScreen
+import com.lamz.trackinv.presentation.ui.screen.prediksi.PrediksiScreen
 import com.lamz.trackinv.presentation.ui.screen.home.HomeScreen
 import com.lamz.trackinv.presentation.ui.screen.inventory.InventoryScreen
 import com.lamz.trackinv.presentation.ui.screen.inventory.detail.InvDetailScreen
@@ -91,7 +91,8 @@ fun TrackInvApp(
                 CustomerScreen(
                     navigateToDetail = { idCustomer ->
                         navController.navigate(Screen.Out.createRoute(idCustomer))
-                    })
+                    },
+                    navController = navController)
             }
 
             composable(route = Screen.Out.route,
@@ -117,8 +118,8 @@ fun TrackInvApp(
                 )
 
             }
-            composable(route = Screen.Chatbot.route){
-                ChatBotScreen()
+            composable(route = Screen.Prediksi.route){
+                PrediksiScreen()
             }
 
 

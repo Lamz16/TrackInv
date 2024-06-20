@@ -27,6 +27,9 @@ class InventoryViewModel @Inject constructor(private val useCase: TrackInvUseCas
     val updateProductState: MutableStateFlow<UiState<Unit>> = _updateProductState
 
 
+    init {
+        getAllInventory()
+    }
     fun getAllInventory() {
         viewModelScope.launch {
             useCase.getAllProduct()

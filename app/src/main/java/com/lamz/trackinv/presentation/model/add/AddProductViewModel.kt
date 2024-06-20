@@ -15,10 +15,6 @@ class AddProductViewModel @Inject constructor(private val useCase: TrackInvUseCa
     private val _uiState: MutableStateFlow<UiState<Unit>> = MutableStateFlow(UiState.Loading)
     val uiState: MutableStateFlow<UiState<Unit>> = _uiState
 
-//    fun getSession(): LiveData<UserModel> {
-////        return repository.getSession().asLiveData()
-//    }
-
     fun addProduct( barang : BarangModel) {
 
         viewModelScope.launch {

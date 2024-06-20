@@ -91,7 +91,6 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.kotlinx.coroutines.android)
 
-
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)

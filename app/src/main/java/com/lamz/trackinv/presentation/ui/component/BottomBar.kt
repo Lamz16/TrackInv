@@ -51,7 +51,7 @@ fun BottomBar(
             NavigationItem(
                 title = stringResource(R.string.menu_prediction),
                 icon = ImageBitmap.imageResource(id = R.drawable.ic_predictive),
-                screen = Screen.Chatbot
+                screen = Screen.Prediksi
             ),
 
             )
