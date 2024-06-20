@@ -1,5 +1,3 @@
-@file:JvmName("CardItemTransactionsUpdateKt")
-
 package com.lamz.trackinv.presentation.ui.component
 
 import androidx.compose.foundation.Image
@@ -26,14 +24,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
 import com.lamz.trackinv.presentation.ui.theme.green
-import com.lamz.trackinv.utils.convertStringToCalendar
 import java.text.NumberFormat
-import java.util.Calendar
 import java.util.Locale
 
 @Composable
@@ -45,11 +40,6 @@ fun CardItemTransactions(
     waktu: String,
     modifier: Modifier = Modifier,
 ) {
-
-    val calendar = convertStringToCalendar(waktu)
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH) + 1
-    val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
 
     val nominal = harga.toInt()
     val formattedNominal = NumberFormat.getNumberInstance(Locale("id", "ID")).format(nominal)
