@@ -5,6 +5,7 @@ import com.lamz.trackinv.domain.model.CustomerModel
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.ui.state.UiState
+import com.lamz.trackinv.utils.StockData
 import kotlinx.coroutines.flow.Flow
 
 interface TrackInvUseCase {
@@ -24,4 +25,5 @@ interface TrackInvUseCase {
     fun getAllTransaction() : Flow<UiState<List<TransaksiModel>>>
     fun getAllUpdatedTransaction() : Flow<UiState<List<TransaksiModel>>>
     fun getTransactionsByDateRange(fromDate: String, toDate: String, namaBarang: String): Flow<List<TransaksiModel>>
+    fun predictStockOut(fromDate: String, toDate: String, namaBarang: String): Flow<Triple<List<StockData>, Double, Double>>
 }

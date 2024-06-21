@@ -1,15 +1,19 @@
 package com.lamz.trackinv.presentation.ui.screen.prediksi
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -74,6 +78,11 @@ fun PrediksiScreen(
     var qty by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
 
+    val predictionState by viewModel.predictionState.collectAsStateWithLifecycle()
+    val mapeState by viewModel.mapeState.collectAsStateWithLifecycle()
+    val mseState by viewModel.mseState.collectAsStateWithLifecycle()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,42 +108,43 @@ fun PrediksiScreen(
             onExpandedChange = { expanded = it })
 
 
-        Text(
-            text = "Pilih Periode : ",
-            color = black40,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(16.dp)
-        )
 
-        Row(
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
+
+        Row {
+            Text(
+                text = "Pilih Periode : ",
+                color = black40,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+            )
+
             Text(
                 text = selectedDateLabelFrom.value,
                 color = black40,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
+                fontSize = 12.sp,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 8.dp)
                     .clickable { openDialogFrom.value = true }
             )
 
             Text(
-                text = "Hingga",
+                text = "to",
                 color = black40,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,
-                modifier = Modifier.padding(16.dp)
             )
 
             Text(
                 text = selectedDateLabelTo.value,
                 color = black40,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
+                fontSize = 12.sp,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 16.dp)
                     .clickable { openDialogTo.value = true }
             )
         }
@@ -182,7 +192,11 @@ fun PrediksiScreen(
                 val fromDate = selectedDateLabelFrom.value
                 val toDate = selectedDateLabelTo.value
                 viewModel.getTotalStock(fromDate, toDate, selectedItem ?: "")
-            }, modifier = Modifier.align(Alignment.CenterHorizontally),
+                viewModel.predictStockOut(fromDate, toDate, selectedItem ?: "")
+            },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp),
             enabled = selectedItem != null && selectedDateLabelTo.value != "-" && selectedDateLabelFrom.value != "-",
             colors = ButtonDefaults.buttonColors(black40)
         ) {
@@ -231,11 +245,151 @@ fun PrediksiScreen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+
             }
         }
 
+        // Tampilkan hasil prediksi
+        when (val state = predictionState) {
+            is UiState.Loading -> {}
 
+            is UiState.Success -> {
+                val predictions = state.data
+
+                if (predictions.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "Prediksi Stok Keluar untuk 7 hari ke depan",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = black40,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                            // Header Table
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = "Tanggal",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                                Text(
+                                    text = "Prediksi Stok",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                            }
+                            HorizontalDivider(thickness = 1.dp, color = black40)
+                        }
+                        items(predictions.size) { index ->
+                            val prediction = predictions[index]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = prediction.date,
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                                Text(
+                                    text = "${prediction.stock.toFloat()}",
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                            }
+                            if (index < predictions.size - 1) {
+                                HorizontalDivider(thickness = 1.dp, color = black40)
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = "MAPE",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                                Text(
+                                    text = "MSE",
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                    color = black40
+                                )
+                            }
+                            HorizontalDivider(thickness = 1.dp, color = black40)
+                        }
+
+
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                when (val mapeResult = mapeState) {
+                                    is UiState.Success -> Text(
+                                        "${String.format(Locale.US, "%.2f", mapeResult.data)}%",
+                                        modifier = Modifier.weight(1f),
+                                        color = black40
+                                    )
+
+                                    is UiState.Error -> Text("MAPE: Error")
+                                    is UiState.Loading -> {}
+                                }
+
+                                when (val mseResult = mseState) {
+                                    is UiState.Success -> Text(
+                                        String.format(Locale.US, "%.2f", mseResult.data),
+                                        modifier = Modifier.weight(1f),
+                                        color = black40
+                                    )
+
+                                    is UiState.Error -> Text("MSE: Error")
+                                    is UiState.Loading -> {}
+                                }
+                            }
+                        }
+
+                    }
+                } else {
+                    Text(
+                        text = "Tidak ada data stok untuk periode ini.",
+                        color = black40,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            is UiState.Error -> {
+                Text(
+                    text = "Error: ${state.errorMessage}",
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Log.d("Pediksi Data", "PrediksiScreen: ${state.errorMessage} ")
+            }
+        }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

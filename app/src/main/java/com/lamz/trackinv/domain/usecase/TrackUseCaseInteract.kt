@@ -6,6 +6,7 @@ import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.domain.repository.TrackRepository
 import com.lamz.trackinv.presentation.ui.state.UiState
+import com.lamz.trackinv.utils.StockData
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -79,6 +80,12 @@ class TrackUseCaseInteract @Inject constructor(
         toDate: String,
         namaBarang: String
     ): Flow<List<TransaksiModel>> = repository.getTransactionsByDateRange(fromDate, toDate,namaBarang)
+
+    override fun predictStockOut(
+        fromDate: String,
+        toDate: String,
+        namaBarang: String
+    ): Flow<Triple<List<StockData>, Double, Double>> = repository.predictStockOut(fromDate, toDate, namaBarang)
 
 
 }

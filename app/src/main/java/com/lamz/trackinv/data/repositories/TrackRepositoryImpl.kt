@@ -6,10 +6,15 @@ import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.domain.repository.TrackRepository
 import com.lamz.trackinv.presentation.ui.state.UiState
+import com.lamz.trackinv.utils.DoubleExponentialSmoothing
 import com.lamz.trackinv.utils.FirebaseUtils
+import com.lamz.trackinv.utils.StockData
+import com.lamz.trackinv.utils.getDatesBetween
 import com.lamz.trackinv.utils.getFormattedCurrentDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
@@ -129,5 +134,33 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
             it.namaBarang == namaBarang && transactionDate in fromDateMillis..toDateMillis
         }
         emit(filteredTransactions)
+    }
+
+    override fun predictStockOut(
+        fromDate: String,
+        toDate: String,
+        namaBarang: String
+    ): Flow<Triple<List<StockData>, Double, Double>> = flow{
+        val transactions = getTransactionsByDateRange(fromDate, toDate, namaBarang).firstOrNull()
+
+        if (transactions != null) {
+            val stockOutData = mutableListOf<StockData>()
+            val dateRange = getDatesBetween(fromDate, toDate)
+
+            for (date in dateRange) {
+                val transaction = transactions.find { it.tglTran == date && it.jenisTran == "Keluar" }
+                val stock = transaction?.jumlah?.toDoubleOrNull() ?: 0.0
+                stockOutData.add(StockData(date, stock))
+            }
+
+            val des = DoubleExponentialSmoothing(0.5, 0.3)
+            val prediction = des.predict(stockOutData, 7)
+
+            val mape = des.calculateMAPE(stockOutData, prediction)
+            val mse = des.calculateMSE(stockOutData, prediction)
+            emit(Triple(prediction, mape, mse))
+        } else {
+            emit(Triple(emptyList(), 0.0, 0.0)) // Return empty list if no transactions found
+        }
     }
 }

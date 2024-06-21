@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.usecase.TrackInvUseCase
 import com.lamz.trackinv.presentation.ui.state.UiState
+import com.lamz.trackinv.utils.StockData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -92,6 +93,31 @@ class InventoryViewModel @Inject constructor(private val useCase: TrackInvUseCas
                     val totalStock = transactions.filter { it.jenisTran == "Keluar" }
                         .sumOf { it.jumlah?.toIntOrNull() ?: 0 }
                     _totalStockState.value = UiState.Success(totalStock)
+                }
+        }
+    }
+
+
+    private val _predictionState = MutableStateFlow<UiState<List<StockData>>>(UiState.Loading)
+    val predictionState: StateFlow<UiState<List<StockData>>> = _predictionState
+
+    private val _mapeState = MutableStateFlow<UiState<Double>>(UiState.Loading)
+    val mapeState: StateFlow<UiState<Double>> = _mapeState
+
+    private val _mseState = MutableStateFlow<UiState<Double>>(UiState.Loading)
+    val mseState: StateFlow<UiState<Double>> = _mseState
+
+    fun predictStockOut(fromDate: String, toDate: String, namaBarang: String) {
+        _predictionState.value = UiState.Loading
+        viewModelScope.launch {
+            useCase.predictStockOut(fromDate, toDate, namaBarang)
+                .catch {
+                    _predictionState.value = UiState.Error(it.message.toString())
+                }
+                .collect { (prediction, mape, mse) ->
+                    _predictionState.value = UiState.Success(prediction)
+                    _mapeState.value = UiState.Success(mape)
+                    _mseState.value = UiState.Success(mse)
                 }
         }
     }
