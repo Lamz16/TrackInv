@@ -60,7 +60,6 @@ fun PrediksiScreen(
     val mapeState by viewModel.mapeState.collectAsStateWithLifecycle()
     val mseState by viewModel.mseState.collectAsStateWithLifecycle()
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -155,7 +154,7 @@ fun PrediksiScreen(
                 val fromDateMillis = selectedDateFrom.selectedDateMillis
                 val toDateMillis = it
                 if (fromDateMillis != null && toDateMillis - fromDateMillis > 7 * 24 * 60 * 60 * 1000) {
-                    showAlert.value = true
+                    showAlert.value = !showAlert.value
                 } else {
                     selectedDateLabelTo.value = it.convertMillisToDate()
                     showAlert.value = false
@@ -175,7 +174,7 @@ fun PrediksiScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp),
-            enabled = selectedItem != null && selectedDateLabelTo.value != "-" && selectedDateLabelFrom.value != "-" && showAlert.value,
+            enabled = selectedItem != null && selectedDateLabelTo.value != "-" && selectedDateLabelFrom.value != "-" && !showAlert.value,
             colors = ButtonDefaults.buttonColors(black40)
         ) {
 
