@@ -2,18 +2,17 @@ package com.lamz.trackinv.data.repositories
 
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.model.CustomerModel
+import com.lamz.trackinv.domain.model.StockData
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.domain.repository.TrackRepository
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.utils.DoubleExponentialSmoothing
 import com.lamz.trackinv.utils.FirebaseUtils
-import com.lamz.trackinv.utils.StockData
 import com.lamz.trackinv.utils.getDatesBetween
 import com.lamz.trackinv.utils.getFormattedCurrentDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn

@@ -2,10 +2,10 @@ package com.lamz.trackinv.domain.repository
 
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.model.CustomerModel
+import com.lamz.trackinv.domain.model.StockData
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.ui.state.UiState
-import com.lamz.trackinv.utils.StockData
 import kotlinx.coroutines.flow.Flow
 
 interface TrackRepository {

@@ -1,11 +1,12 @@
 package com.lamz.trackinv.utils
 
+import com.lamz.trackinv.domain.model.StockData
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
 
-data class StockData(val date: String, val stock: Double)
+
 
 class DoubleExponentialSmoothing(val alpha: Double, val beta: Double) {
 

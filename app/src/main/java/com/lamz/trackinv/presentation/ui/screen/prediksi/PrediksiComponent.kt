@@ -33,10 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.Text
+import com.lamz.trackinv.domain.model.StockData
 import com.lamz.trackinv.presentation.model.inventory.InventoryViewModel
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.presentation.ui.theme.black40
-import com.lamz.trackinv.utils.StockData
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

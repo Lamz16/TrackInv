@@ -3,9 +3,9 @@ package com.lamz.trackinv.presentation.model.inventory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lamz.trackinv.domain.model.BarangModel
+import com.lamz.trackinv.domain.model.StockData
 import com.lamz.trackinv.domain.usecase.TrackInvUseCase
 import com.lamz.trackinv.presentation.ui.state.UiState
-import com.lamz.trackinv.utils.StockData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
