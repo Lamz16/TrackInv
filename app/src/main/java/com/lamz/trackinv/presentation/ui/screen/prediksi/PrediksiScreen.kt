@@ -175,7 +175,7 @@ fun PrediksiScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp),
-            enabled = selectedItem != null && selectedDateLabelTo.value != "-" && selectedDateLabelFrom.value != "-",
+            enabled = selectedItem != null && selectedDateLabelTo.value != "-" && selectedDateLabelFrom.value != "-" && showAlert.value,
             colors = ButtonDefaults.buttonColors(black40)
         ) {
 
