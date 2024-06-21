@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -116,4 +118,16 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
             emit(UiState.Error(e.message.toString()))
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun getTransactionsByDateRange(fromDate: String, toDate: String, namaBarang: String): Flow<List<TransaksiModel>> = flow {
+        val snapshot = FirebaseUtils.dbTransaksi.get().await()
+        val transactionList = snapshot.children.mapNotNull { it.getValue(TransaksiModel::class.java) }
+        val filteredTransactions = transactionList.filter {
+            val transactionDate = SimpleDateFormat("dd-MM-yyyy", Locale.US).parse(it.tglTran!!)?.time ?: 0
+            val fromDateMillis = SimpleDateFormat("dd-MM-yyyy", Locale.US).parse(fromDate)?.time ?: 0
+            val toDateMillis = SimpleDateFormat("dd-MM-yyyy", Locale.US).parse(toDate)?.time ?: 0
+            it.namaBarang == namaBarang && transactionDate in fromDateMillis..toDateMillis
+        }
+        emit(filteredTransactions)
+    }
 }

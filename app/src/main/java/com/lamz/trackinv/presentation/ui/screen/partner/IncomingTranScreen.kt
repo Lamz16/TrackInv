@@ -240,6 +240,7 @@ fun IncomingContent(
                                     masuk,
                                     namaSupplier,
                                     namaBarang,
+                                    qty,
                                     totalValue.toString(),
                                     currentDate
                                 )

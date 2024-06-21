@@ -239,6 +239,7 @@ fun OutGoingContent(
                                     keluar,
                                     namaCustomer,
                                     namaBarang,
+                                    qty,
                                     totalValue.toString(),
                                     currentDate
                                 )

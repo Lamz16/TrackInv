@@ -5,6 +5,7 @@ data class TransaksiModel(
     val jenisTran : String? = "",
     val namaPartner : String? = "",
     val namaBarang : String? = "",
+    val jumlah : String? ="",
     val nominal : String? = "",
     val tglTran : String? =""
 )

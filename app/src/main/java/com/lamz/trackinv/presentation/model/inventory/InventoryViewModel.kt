@@ -78,5 +78,23 @@ class InventoryViewModel @Inject constructor(private val useCase: TrackInvUseCas
         }
     }
 
+    private val _totalStockState = MutableStateFlow<UiState<Int>>(UiState.Loading)
+    val totalStockState: StateFlow<UiState<Int>> = _totalStockState
+
+    fun getTotalStock(fromDate: String, toDate: String, namaBarang: String) {
+        _totalStockState.value = UiState.Loading
+        viewModelScope.launch {
+            useCase.getTransactionsByDateRange(fromDate, toDate, namaBarang)
+                .catch {
+                    _totalStockState.value = UiState.Error(it.message.toString())
+                }
+                .collect { transactions ->
+                    val totalStock = transactions.filter { it.jenisTran == "Keluar" }
+                        .sumOf { it.jumlah?.toIntOrNull() ?: 0 }
+                    _totalStockState.value = UiState.Success(totalStock)
+                }
+        }
+    }
+
 
 }

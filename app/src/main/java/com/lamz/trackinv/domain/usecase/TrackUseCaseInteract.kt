@@ -74,5 +74,11 @@ class TrackUseCaseInteract @Inject constructor(
         return repository.getAllUpdatedTransaction()
     }
 
+    override fun getTransactionsByDateRange(
+        fromDate: String,
+        toDate: String,
+        namaBarang: String
+    ): Flow<List<TransaksiModel>> = repository.getTransactionsByDateRange(fromDate, toDate,namaBarang)
+
 
 }

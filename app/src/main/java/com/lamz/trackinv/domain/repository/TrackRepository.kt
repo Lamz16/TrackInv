@@ -24,4 +24,6 @@ interface TrackRepository {
 
     fun getAllTransaction() : Flow<UiState<List<TransaksiModel>>>
     fun getAllUpdatedTransaction() : Flow<UiState<List<TransaksiModel>>>
+
+    fun getTransactionsByDateRange(fromDate: String, toDate: String, namaBarang: String): Flow<List<TransaksiModel>>
 }
