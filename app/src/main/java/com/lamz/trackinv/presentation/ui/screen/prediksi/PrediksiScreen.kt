@@ -36,6 +36,7 @@ import com.lamz.trackinv.presentation.model.inventory.InventoryViewModel
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.presentation.ui.theme.black40
 import com.lamz.trackinv.presentation.ui.theme.yellow
+import com.lamz.trackinv.presentation.ui.view.main.ui.theme.PurpleGrey40
 import com.lamz.trackinv.presentation.ui.view.main.ui.theme.TrackInvTheme
 import java.util.Locale
 
@@ -221,6 +222,7 @@ fun PrediksiScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 16.dp)
+                                .background(black40)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -231,13 +233,13 @@ fun PrediksiScreen(
                                     text = "MAPE",
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.weight(1f),
-                                    color = black40
+                                    color = yellow
                                 )
                                 Text(
                                     text = "MSE",
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.weight(1f),
-                                    color = black40
+                                    color = yellow
                                 )
                             }
                             HorizontalDivider(thickness = 1.dp, color = black40)
@@ -250,7 +252,7 @@ fun PrediksiScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                                .background(black40)
+
                         ) {
                             Row(
                                 modifier = Modifier
@@ -261,7 +263,7 @@ fun PrediksiScreen(
                                     is UiState.Success -> Text(
                                         "${String.format(Locale.US, "%.2f", dataMape.data)}%",
                                         modifier = Modifier.weight(1f),
-                                        color = yellow
+                                        color = black40
                                     )
 
                                     is UiState.Error -> Text("MAPE: Error")
@@ -272,7 +274,7 @@ fun PrediksiScreen(
                                     is UiState.Success -> Text(
                                         String.format(Locale.US, "%.2f", dataMSe.data),
                                         modifier = Modifier.weight(1f),
-                                        color = yellow
+                                        color = black40
                                     )
 
                                     is UiState.Error -> Text("MSE: Error")
