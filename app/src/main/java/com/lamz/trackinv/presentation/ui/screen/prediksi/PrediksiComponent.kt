@@ -1,19 +1,17 @@
 package com.lamz.trackinv.presentation.ui.screen.prediksi
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -24,22 +22,133 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.Text
-import com.lamz.trackinv.domain.model.StockData
+import com.lamz.trackinv.R
 import com.lamz.trackinv.presentation.model.inventory.InventoryViewModel
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.presentation.ui.theme.black40
+import com.lamz.trackinv.presentation.ui.theme.red
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun TopBar() {
+    CenterAlignedTopAppBar(title = {
+        Text(
+            text = "Prediksi Stok",
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 28.sp
+        )
+    })
+    HorizontalDivider(color = black40)
+}
+
+@Composable
+internal fun DatePickerRow(
+    selectedDateLabelFrom: MutableState<String>,
+    openDialogFrom: MutableState<Boolean>,
+    selectedDateLabelTo: MutableState<String>,
+    openDialogTo: MutableState<Boolean>
+) {
+    Row {
+        Text(
+            text = "Pilih Periode : ",
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+        )
+
+        Text(
+            text = selectedDateLabelFrom.value,
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(end = 8.dp)
+                .clickable { openDialogFrom.value = true }
+        )
+
+        Text(
+            text = "to",
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+        )
+
+        Text(
+            text = selectedDateLabelTo.value,
+            color = black40,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(start = 16.dp)
+                .clickable { openDialogTo.value = true }
+        )
+    }
+}
+
+@Composable
+internal fun PredictButton(
+    selectedItem: String?,
+    selectedDateLabelFrom: String,
+    selectedDateLabelTo: String,
+    onClick: () -> Unit,
+    onExpandedClick: () -> Unit,
+    onOpenDialogFromClick: () -> Unit,
+    onOpenDialogToClick: () -> Unit,
+    modifier: Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .padding(top = 8.dp),
+        enabled = selectedItem != null && selectedDateLabelTo != "-" && selectedDateLabelFrom != "-",
+        colors = ButtonDefaults.buttonColors(black40)
+    ) {
+        when {
+            selectedItem == null -> Text(
+                text = "Pilih item dahulu",
+                color = red,
+                modifier = modifier.clickable { onExpandedClick() }
+            )
+
+            selectedDateLabelFrom == "-" -> Text(
+                text = "Pilih dari tanggal dahulu",
+                color = red,
+                modifier = modifier.clickable { onOpenDialogFromClick() }
+            )
+
+            selectedDateLabelTo == "-" -> Text(
+                text = "Pilih hingga tanggal dahulu",
+                color = red,
+                modifier = modifier.clickable { onOpenDialogToClick() }
+            )
+
+            else -> Text(
+                text = "Hitung Total Stok Keluar",
+                color = colorResource(id = R.color.Yellow)
+            )
+        }
+    }
+}
+
 
 @Composable
 internal fun TotalStock(
@@ -66,152 +175,6 @@ internal fun TotalStock(
                 fontSize = 18.sp
             )
 
-        }
-    }
-}
-
-@Composable
-internal fun PredictionResult(
-    predictionState: UiState<List<StockData>>,
-    mapeState: UiState<Double>,
-    mseState: UiState<Double>
-) {
-    when (predictionState) {
-        is UiState.Loading -> {}
-
-        is UiState.Success -> {
-            val predictions = predictionState.data
-
-            if (predictions.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    item {
-                        Text(
-                            text = "Prediksi Stok Keluar untuk 7 hari ke depan",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = black40,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        // Header Table
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = "Tanggal",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                            Text(
-                                text = "Prediksi Stok",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                        }
-                        HorizontalDivider(thickness = 1.dp, color = black40)
-                    }
-                    items(predictions.size) { index ->
-                        val prediction = predictions[index]
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = prediction.date,
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                            Text(
-                                text = "${prediction.stock.toFloat()}",
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                        }
-                        if (index < predictions.size - 1) {
-                            HorizontalDivider(thickness = 1.dp, color = black40)
-                        }
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = "MAPE",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                            Text(
-                                text = "MSE",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                color = black40
-                            )
-                        }
-                        HorizontalDivider(thickness = 1.dp, color = black40)
-                    }
-
-
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            when (mapeState) {
-                                is UiState.Success -> Text(
-                                    "${String.format(Locale.US, "%.2f", mapeState.data)}%",
-                                    modifier = Modifier.weight(1f),
-                                    color = black40
-                                )
-
-                                is UiState.Error -> Text("MAPE: Error")
-                                is UiState.Loading -> {}
-                            }
-
-                            when (mseState) {
-                                is UiState.Success -> Text(
-                                    String.format(Locale.US, "%.2f", mseState.data),
-                                    modifier = Modifier.weight(1f),
-                                    color = black40
-                                )
-
-                                is UiState.Error -> Text("MSE: Error")
-                                is UiState.Loading -> {}
-                            }
-                        }
-                    }
-
-                }
-            } else {
-                Text(
-                    text = "Tidak ada data stok untuk periode ini.",
-                    color = black40,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
-        is UiState.Error -> {
-            Text(
-                text = "Error: ${predictionState.errorMessage}",
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-            Log.d("Pediksi Data", "PrediksiScreen: ${predictionState.errorMessage} ")
         }
     }
 }

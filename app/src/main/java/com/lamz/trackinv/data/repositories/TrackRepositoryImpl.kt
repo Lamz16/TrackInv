@@ -153,7 +153,7 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
             }
 
             val des = DoubleExponentialSmoothing(0.5, 0.3)
-            val prediction = des.predict(stockOutData, 7)
+            val prediction = des.predict(stockOutData, stockOutData.size)
 
             val mape = des.calculateMAPE(stockOutData, prediction)
             val mse = des.calculateMSE(stockOutData, prediction)
