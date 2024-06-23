@@ -31,10 +31,7 @@ fun StockDialog(
     when{
          listBarang.isEmpty() -> {
              Dialog(onDismissRequest = {onDismissRequest()}){
-                 Card(
-                     modifier
-                         .fillMaxSize()
-                 ){
+                 Card{
                      TextItem(
                          desc = textEmpty,
                          modifier = Modifier.padding(16.dp),
