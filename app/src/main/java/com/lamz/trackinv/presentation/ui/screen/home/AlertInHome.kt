@@ -44,7 +44,8 @@ internal fun StockTersediaAlert(
                     modifier = modifier,
                     onDismissRequest = { closePopupTersedia() },
                     navHostController = navController,
-                    textError = stokTersedia.errorMessage
+                    listBarang = emptyList(),
+                    textError = stokTersedia.errorMessage,
                 )
             }
         }
@@ -65,7 +66,8 @@ internal fun StockTersediaAlert(
                         .padding(vertical = 60.dp),
                     onDismissRequest = { closePopupTersedia() },
                     navHostController = navController,
-                    listBarang = stokTersedia.data
+                    listBarang = stokTersedia.data,
+                    textEmpty = stringResource(R.string.anda_kekurangan_stok)
                 )
             }
         }
@@ -97,7 +99,9 @@ internal fun StockMenipisALert(
                     modifier = modifier,
                     onDismissRequest = { closePopupMenipis() },
                     navHostController = navController,
-                    textError = produkMenipis.errorMessage
+                    listBarang = emptyList(),
+                    textError = produkMenipis.errorMessage,
+
                 )
             }
         }
@@ -118,7 +122,8 @@ internal fun StockMenipisALert(
                         .padding(vertical = 60.dp),
                     onDismissRequest = { closePopupMenipis() },
                     navHostController = navController,
-                    listBarang = produkMenipis.data
+                    listBarang = produkMenipis.data,
+                    textEmpty = stringResource(R.string.tidal_ada_produk_yang_menipis)
                 )
             }
         }
@@ -150,6 +155,7 @@ internal fun StockHabisAlert(
                     modifier = modifier,
                     onDismissRequest = { closePopupMenipis() },
                     navHostController = navController,
+                    listBarang = emptyList(),
                     textError = produkHabis.errorMessage
                 )
             }
@@ -172,7 +178,8 @@ internal fun StockHabisAlert(
                         .padding(vertical = 60.dp),
                     onDismissRequest = { closePopupMenipis() },
                     navHostController = navController,
-                    listBarang = produkHabis.data
+                    listBarang = produkHabis.data,
+                    textEmpty = stringResource(R.string.tidak_ada_stok_yang_habis)
                 )
             }
         }

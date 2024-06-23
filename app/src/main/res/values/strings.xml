@@ -21,4 +21,7 @@
     <string name="menu_prediction">Prediction</string>
     <string name="tran_masuk">"- Rp. %s"</string>
     <string name="tran_keluar">+ Rp. %s</string>
+    <string name="tidal_ada_produk_yang_menipis">Tidal ada produk yang menipis</string>
+    <string name="tidak_ada_stok_yang_habis">Tidak ada stok yang habis</string>
+    <string name="anda_kekurangan_stok">Anda kekurangan stok</string>
 </resources>
