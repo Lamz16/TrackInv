@@ -33,7 +33,7 @@ import java.util.Locale
 @Composable
 fun CardLongItem(
     namaItem: String,
-    pieces: String,
+    pieces: Int,
     hargaJual: String,
     hargaBeli: String,
     modifier: Modifier = Modifier,
@@ -105,7 +105,7 @@ fun CardLongItem(
                 .padding(start = 16.dp, end = 20.dp, top = 10.dp)
         ){
             Text(
-                text = pieces
+                text = pieces.toString()
             )
             Text(
                 text = stringResource(id = R.string.id_inventory, formattedPriceJual)
@@ -122,5 +122,5 @@ fun CardLongItem(
 @Preview(showBackground = true)
 @Composable
 fun CardLongItemPreview(){
-    CardLongItem("IndoFood","10","accesoris","0")
+    CardLongItem("IndoFood",10,"accesoris","0")
 }

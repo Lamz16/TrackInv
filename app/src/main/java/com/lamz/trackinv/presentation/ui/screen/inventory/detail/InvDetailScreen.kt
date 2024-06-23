@@ -103,7 +103,7 @@ fun InvDetailContent(
     var showLoadingUpdate by remember { mutableStateOf(false) }
     var showLoading by remember { mutableStateOf(false) }
     var editedNamaBarang by remember { mutableStateOf(inventory.namaBarang ?: "") }
-    var editedstokBarang by remember { mutableStateOf(inventory.stokBarang ?: "") }
+    var editedstokBarang by remember { mutableStateOf(inventory.stokBarang.toString() ?: "") }
     var editedhargaBeli by remember{ mutableStateOf(inventory.buy ?: "") }
     var editedhargaJual by remember { mutableStateOf(inventory.sell ?: "") }
     val deleteproduct by viewModel.deleteProductState.collectAsState()
@@ -141,7 +141,7 @@ fun InvDetailContent(
             keyboardType = KeyboardType.Text,
             onValueChange = { editedNamaBarang = it })
         OutLinedTextItem(
-            editedstokBarang,
+            editedstokBarang.toString(),
             text = "Stok Barang",
             containerColor = containerColor,
             keyboardType = KeyboardType.Number,
@@ -165,7 +165,7 @@ fun InvDetailContent(
                 val updatedBarang = BarangModel(
                     idBarang = inventory.idBarang,
                     namaBarang = editedNamaBarang,
-                    stokBarang = editedstokBarang,
+                    stokBarang = editedstokBarang.toInt(),
                     buy = editedhargaBeli,
                     sell = editedhargaJual
                 )

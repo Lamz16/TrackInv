@@ -78,6 +78,24 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
         emit(barang ?: BarangModel())
     }
 
+    override fun getAllProductMoreThan(): Flow<List<BarangModel>> = flow {
+        val snapshot = FirebaseUtils.dbBarang.orderByChild("stokBarang").startAt(50.0).get().await()
+        val productList = snapshot.children.mapNotNull { it.getValue(BarangModel::class.java) }
+        emit(productList)
+    }
+
+    override fun getAllProductThin(): Flow<List<BarangModel>> = flow {
+        val snapshot = FirebaseUtils.dbBarang.orderByChild("stokBarang").startAt(1.0).endAt(49.0).get().await()
+        val productList = snapshot.children.mapNotNull { it.getValue(BarangModel::class.java) }
+        emit(productList)
+    }
+
+    override fun getALlProductOut(): Flow<List<BarangModel>> = flow{
+        val snapshot = FirebaseUtils.dbBarang.orderByChild("stokBarang").equalTo(0.0).get().await()
+        val productList = snapshot.children.mapNotNull { it.getValue(BarangModel::class.java) }
+        emit(productList)
+    }
+
     override suspend fun deleteProduct(idBarang: String) {
         val barangRef = FirebaseUtils.dbBarang.child(idBarang)
         barangRef.removeValue().await()

@@ -18,6 +18,9 @@ interface TrackRepository {
     suspend fun addProduct(barang: BarangModel)
     fun getAllProduct(): Flow<List<BarangModel>>
     fun getProductId(idBarang: String): Flow<BarangModel>
+    fun getAllProductMoreThan() : Flow<List<BarangModel>>
+    fun getAllProductThin() : Flow<List<BarangModel>>
+    fun getALlProductOut() : Flow<List<BarangModel>>
     suspend fun deleteProduct(idBarang : String)
     suspend fun updateProduct(idBarang : String, barang: BarangModel)
     suspend fun updateStock(idBarang: String, newStock: Int)

@@ -232,7 +232,7 @@ fun AddProductContent(
                     val barang = BarangModel(
                         idBarang,
                         namaBarang,
-                        stokBarang,
+                        stokBarang.toInt(),
                         hargaBeli,
                         hargaJual
                     )

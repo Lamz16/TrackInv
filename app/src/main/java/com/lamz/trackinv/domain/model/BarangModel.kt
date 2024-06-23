@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 data class BarangModel(
     val idBarang : String? = "",
     val namaBarang: String? = "",
-    val stokBarang : String? = "",
+    val stokBarang : Int? = 0,
     val buy : String? = "",
     val sell : String? =""
 ) : Parcelable

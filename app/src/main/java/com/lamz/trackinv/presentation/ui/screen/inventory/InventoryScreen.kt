@@ -120,7 +120,7 @@ fun InventoryContent(
         filteredProducts = allProducts.filter { barang ->
             val searchText = query.text.lowercase()
             (barang.namaBarang?.lowercase()?.contains(searchText) ?: false) or
-                    (barang.stokBarang?.lowercase()?.contains(searchText) ?: false) or
+                    (barang.stokBarang?.toString()?.contains(searchText) ?: false) or
                     (barang.buy?.lowercase()?.contains(searchText) ?: false)
         }
     }

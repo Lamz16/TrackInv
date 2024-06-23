@@ -135,7 +135,7 @@ fun IncomingContent(
         filteredProducts = listBarang.filter { barang ->
             val searchText = query.text.lowercase()
             (barang.namaBarang?.lowercase()?.contains(searchText) ?: false) or
-                    (barang.stokBarang?.lowercase()?.contains(searchText) ?: false) or
+                    (barang.stokBarang?.toString()?.contains(searchText) ?: false) or
                     (barang.buy?.lowercase()?.contains(searchText) ?: false)
         }
     }
@@ -144,7 +144,7 @@ fun IncomingContent(
         filteredProducts = allProducts.filter { barang ->
             val searchText = query.text.lowercase()
             (barang.namaBarang?.lowercase()?.contains(searchText) ?: false) or
-                    (barang.stokBarang?.lowercase()?.contains(searchText) ?: false) or
+                    (barang.stokBarang?.toString()?.contains(searchText) ?: false) or
                     (barang.buy?.lowercase()?.contains(searchText) ?: false)
         }
     }
@@ -167,7 +167,7 @@ fun IncomingContent(
                         showInputDialogIncoming = true
                     },
                     namaItem = inventory.namaBarang ?: "",
-                    pieces = inventory.stokBarang ?: "",
+                    pieces = inventory.stokBarang ?: 0,
                      hargaJual = inventory.sell ?: "",
                     hargaBeli =  inventory.buy ?: "",
                 )
@@ -247,7 +247,7 @@ fun IncomingContent(
                                 viewModel.addTransactionStock(itemTransac)
 
 
-                                val newStock = (barang.stokBarang?.toInt() ?: 0) + qtyInt
+                                val newStock = (barang.stokBarang ?: 0) + qtyInt
                                 viewModel.updateStock(barang.idBarang!!, newStock)
                                 viewModel.getAllInventory()
                                 qty = ""

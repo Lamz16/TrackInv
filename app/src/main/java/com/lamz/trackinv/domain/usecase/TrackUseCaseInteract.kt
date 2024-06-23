@@ -51,6 +51,11 @@ class TrackUseCaseInteract @Inject constructor(
         return repository.getProductId(idBarang)
     }
 
+    override fun getAllProductMoreThan(): Flow<List<BarangModel>> = repository.getAllProductMoreThan()
+    override fun getAllProductThin(): Flow<List<BarangModel>> = repository.getAllProductThin()
+
+    override fun getALlProductOut(): Flow<List<BarangModel>> = repository.getALlProductOut()
+
     override suspend fun deleteProduct(idBarang: String) {
         repository.deleteProduct(idBarang)
     }
