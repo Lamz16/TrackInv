@@ -108,7 +108,7 @@ class TrackRepositoryImpl @Inject constructor() : TrackRepository {
 
     override suspend fun updateStock(idBarang: String, newStock: Int) {
         val ref = FirebaseUtils.dbBarang.child(idBarang).child("stokBarang")
-        ref.setValue(newStock.toString())
+        ref.setValue(newStock)
     }
 
     override suspend fun addTransactionStock(transaksi: TransaksiModel) {

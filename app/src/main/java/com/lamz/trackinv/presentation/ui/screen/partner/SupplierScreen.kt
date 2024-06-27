@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,10 +57,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.lamz.trackinv.R
 import com.lamz.trackinv.domain.model.SupplierModel
 import com.lamz.trackinv.presentation.model.partner.PartnerViewModel
 import com.lamz.trackinv.presentation.ui.component.CardCategoryItem
+import com.lamz.trackinv.presentation.ui.navigation.Screen
 import com.lamz.trackinv.presentation.ui.state.UiState
 import com.lamz.trackinv.presentation.ui.view.main.MainActivity
 import com.lamz.trackinv.utils.FirebaseUtils
@@ -68,8 +72,34 @@ import kotlinx.coroutines.delay
 fun SupplierScreen(
     modifier: Modifier = Modifier,
     navigateToDetail: (String) -> Unit,
+    navController : NavHostController,
     viewModel: PartnerViewModel = hiltViewModel(),
 ) {
+
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
+
+    val (backPressed, setBackPressed) = remember { mutableStateOf(false) }
+
+
+    DisposableEffect(activity) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                setBackPressed(true)
+            }
+        }
+        activity?.onBackPressedDispatcher?.addCallback(callback)
+        onDispose {
+            callback.remove()
+        }
+    }
+
+    if (backPressed) {
+        navController.navigate(Screen.Home.route){
+            popUpTo(0)
+            restoreState = true
+        }
+    }
 
     Box(
         contentAlignment = Alignment.TopCenter,

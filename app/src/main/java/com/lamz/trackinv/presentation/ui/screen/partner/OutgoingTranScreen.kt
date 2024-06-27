@@ -245,7 +245,7 @@ fun OutGoingContent(
                                 )
                                 viewModel.addTransactionStock(itemTransac)
 
-                                val newStock = (barang.stokBarang?.toInt() ?: 0) - qtyInt
+                                val newStock = (barang.stokBarang ?: 0) - qtyInt
                                 viewModel.updateStock(barang.idBarang!!, newStock)
                                 viewModel.getAllInventory()
                                 qty = ""

@@ -107,7 +107,8 @@ fun TrackInvApp(
                 SupplierScreen(
                     navigateToDetail = { idSupplier ->
                         navController.navigate(Screen.In.createRoute(idSupplier))
-                    })
+                    },
+                    navController = navController)
             }
 
             composable(route = Screen.In.route,
