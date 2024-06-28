@@ -58,7 +58,7 @@ fun CardItemTransactions(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
             .size(100.dp)
