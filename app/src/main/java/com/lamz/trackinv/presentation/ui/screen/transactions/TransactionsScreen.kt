@@ -2,6 +2,7 @@ package com.lamz.trackinv.presentation.ui.screen.transactions
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,15 +40,15 @@ import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.model.transactions.TransactionViewModel
 import com.lamz.trackinv.presentation.ui.component.CardItemTransactions
-import com.lamz.trackinv.presentation.ui.component.CardItemTransactionsUpdate
 import com.lamz.trackinv.presentation.ui.component.SearchBar
+import com.lamz.trackinv.presentation.ui.component.TransactionsDialog
 import com.lamz.trackinv.presentation.ui.state.UiState
 import kotlinx.coroutines.delay
 
 @Composable
 fun TransactionsScreen(
     modifier: Modifier = Modifier,
-    viewModel : TransactionViewModel = hiltViewModel()
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -57,10 +58,11 @@ fun TransactionsScreen(
         val allTransactionState by viewModel.getTransState.collectAsState()
 
 
-        when(val state = allTransactionState){
+        when (val state = allTransactionState) {
             is UiState.Error -> {
                 Text(text = state.errorMessage, modifier = Modifier.align(Alignment.Center))
             }
+
             UiState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 LaunchedEffect(key1 = true, block = {
@@ -70,8 +72,9 @@ fun TransactionsScreen(
                 })
 
             }
+
             is UiState.Success -> {
-                TransactionsContent(modifier = Modifier.padding(16.dp), listTrans =  state.data)
+                TransactionsContent(modifier = Modifier.padding(16.dp), listTrans = state.data)
             }
         }
 
@@ -82,7 +85,7 @@ fun TransactionsScreen(
 @Composable
 fun TransactionsContent(
     modifier: Modifier,
-    listTrans : List<TransaksiModel> = emptyList()
+    listTrans: List<TransaksiModel> = emptyList()
 ) {
     var query by remember { mutableStateOf(TextFieldValue()) }
     val isFocused by remember { mutableStateOf(false) }
@@ -92,6 +95,15 @@ fun TransactionsContent(
         if (isFocused) {
             focusRequester.requestFocus()
         }
+    }
+    var showDetail by remember { mutableStateOf(false) }
+
+    fun showPopupDetail() {
+        showDetail = true
+    }
+
+    fun closePopupDetail() {
+        showDetail = false
     }
 
     var allTransactions by remember { mutableStateOf(emptyList<TransaksiModel>()) }
@@ -130,7 +142,7 @@ fun TransactionsContent(
                         Text("Data barang kosong. Tambahkan terlebih dahulu.")
                     }
                 }
-            }else{
+            } else {
                 items(filteredTransactions) { transactions ->
                     Log.d("Data Transaksi", "TransactionsContent: $transactions")
                     CardItemTransactions(
@@ -138,8 +150,17 @@ fun TransactionsContent(
                         waktu = transactions.tglTran ?: "",
                         harga = transactions.nominal ?: "",
                         type = transactions.jenisTran ?: "",
-                        tipe = transactions.namaPartner ?: ""
+                        tipe = transactions.namaPartner ?: "",
+                        modifier = Modifier.clickable {
+                            showPopupDetail()
+                        }
                     )
+
+                    if (showDetail) {
+                        TransactionsDialog(
+                            transactions = transactions,
+                            onDismissRequest = { closePopupDetail() })
+                    }
 
                 }
             }

@@ -25,12 +25,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
 import com.lamz.trackinv.presentation.ui.theme.green
 import java.text.NumberFormat
 import java.util.Locale
+
 
 @Composable
 fun CardItemTransactions(
@@ -136,3 +138,10 @@ fun CardItemTransactions(
 
     }
 }
+
+@Preview
+@Composable
+private fun Preview() {
+    CardItemTransactions(type = "Masuk", nama = "Beras", harga = "20000", tipe = "ALex", waktu = "20-07-2024")
+}
+
