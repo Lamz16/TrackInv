@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
@@ -79,6 +80,7 @@ fun CardItemTransactions(
                         .background(
                             colorResource(id = R.color.white), shape = RoundedCornerShape(8.dp)
                         )
+                        .size(24.dp)
                 )
                 Text(
                     text = type,
@@ -112,13 +114,22 @@ fun CardItemTransactions(
                     .padding(start = 20.dp, end = 25.dp, top = 10.dp)
             ) {
                 Text(
-                    text = nama
+                    text = nama,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = modifier.weight(1f)
                 )
                 Text(
-                    text = tipe
+                    text = tipe,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = modifier.weight(1f)
                 )
                 Text(
-                    text = waktu
+                    text = waktu,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = modifier.weight(1f)
                 )
             }
         }
