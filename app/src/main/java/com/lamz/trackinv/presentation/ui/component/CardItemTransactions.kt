@@ -2,6 +2,7 @@ package com.lamz.trackinv.presentation.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
+import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.ui.theme.green
 import java.text.NumberFormat
 import java.util.Locale
@@ -41,8 +47,18 @@ fun CardItemTransactions(
     harga: String,
     tipe: String,
     waktu: String,
+    transaksiModel: TransaksiModel? = null,
     modifier: Modifier = Modifier,
 ) {
+    var showDetail by remember { mutableStateOf(false) }
+
+    fun showPopupDetail() {
+        showDetail = true
+    }
+
+    fun closePopupDetail() {
+        showDetail = false
+    }
 
     val nominal = harga.toInt()
     val formattedNominal = NumberFormat.getNumberInstance(Locale("id", "ID")).format(nominal)
@@ -57,11 +73,20 @@ fun CardItemTransactions(
         stringResource(id = R.string.tran_keluar, formattedNominal)
     }
 
+    if (showDetail){
+        transaksiModel?.let {
+            TransactionsDialog(
+                transactions = it,
+                onDismissRequest = { closePopupDetail() })
+        }
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
             .size(100.dp)
+            .clickable { showPopupDetail() }
             .clip(RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(id = R.color.lavender)
@@ -142,6 +167,6 @@ fun CardItemTransactions(
 @Preview
 @Composable
 private fun Preview() {
-    CardItemTransactions(type = "Masuk", nama = "Beras", harga = "20000", tipe = "ALex", waktu = "20-07-2024")
+    CardItemTransactions(type = "Masuk", nama = "Beras", harga = "20000", tipe = "ALex", waktu = "20-07-2024"  )
 }
 

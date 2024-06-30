@@ -96,15 +96,7 @@ fun TransactionsContent(
             focusRequester.requestFocus()
         }
     }
-    var showDetail by remember { mutableStateOf(false) }
 
-    fun showPopupDetail() {
-        showDetail = true
-    }
-
-    fun closePopupDetail() {
-        showDetail = false
-    }
 
     var allTransactions by remember { mutableStateOf(emptyList<TransaksiModel>()) }
     var filteredTransactions by remember { mutableStateOf(emptyList<TransaksiModel>()) }
@@ -151,16 +143,8 @@ fun TransactionsContent(
                         harga = transactions.nominal ?: "",
                         type = transactions.jenisTran ?: "",
                         tipe = transactions.namaPartner ?: "",
-                        modifier = Modifier.clickable {
-                            showPopupDetail()
-                        }
+                       transaksiModel = transactions
                     )
-
-                    if (showDetail) {
-                        TransactionsDialog(
-                            transactions = transactions,
-                            onDismissRequest = { closePopupDetail() })
-                    }
 
                 }
             }
