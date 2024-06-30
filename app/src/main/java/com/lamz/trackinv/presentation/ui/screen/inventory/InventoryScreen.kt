@@ -1,7 +1,6 @@
 package com.lamz.trackinv.presentation.ui.screen.inventory
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,7 +43,7 @@ import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.R
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.presentation.model.inventory.InventoryViewModel
-import com.lamz.trackinv.presentation.ui.component.CardLongItem
+import com.lamz.trackinv.presentation.ui.component.CardLongInventory
 import com.lamz.trackinv.presentation.ui.component.SearchBar
 import com.lamz.trackinv.presentation.ui.navigation.Screen
 import com.lamz.trackinv.presentation.ui.state.UiState
@@ -60,7 +59,6 @@ fun InventoryScreen(
 ) {
 
 
-
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
@@ -68,21 +66,27 @@ fun InventoryScreen(
         val allProductState by viewModel.getInventoryState.collectAsState()
 
 
-        when(val state = allProductState){
+        when (val state = allProductState) {
             is UiState.Error -> {
                 Text(text = state.errorMessage, modifier = Modifier.align(Alignment.Center))
             }
+
             UiState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 LaunchedEffect(key1 = true, block = {
                     delay(500L)
-                        viewModel.getAllInventory()
+                    viewModel.getAllInventory()
 
                 })
 
             }
+
             is UiState.Success -> {
-                InventoryContent(navController = navController, navigateToDetail = navigateToDetail, listBarang = state.data)
+                InventoryContent(
+                    navController = navController,
+                    navigateToDetail = navigateToDetail,
+                    listBarang = state.data
+                )
             }
         }
 
@@ -102,7 +106,7 @@ fun InventoryContent(
     var query by remember { mutableStateOf(TextFieldValue()) }
     val isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    var showDialog by remember { mutableStateOf(false) }
+
 
 
     LaunchedEffect(true) {
@@ -130,21 +134,14 @@ fun InventoryContent(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
+
         LazyColumn(
             state = rememberLazyListState(),
             contentPadding = PaddingValues(top = 80.dp, bottom = 80.dp),
             modifier = Modifier.padding(top = 8.dp)
         ) {
             items(filteredProducts) { inventory ->
-                CardLongItem(
-                    modifier = Modifier.clickable {
-                        navigateToDetail(inventory.idBarang!!)
-                    },
-                    namaItem = inventory.namaBarang!!,
-                    pieces = inventory.stokBarang!!,
-                    hargaJual = inventory.sell!!,
-                    hargaBeli = inventory.buy!!
-                )
+                CardLongInventory(inventory = inventory, navigateToDetail = navigateToDetail)
             }
 
             if (filteredProducts.isEmpty()) {
@@ -194,7 +191,6 @@ fun InventoryContent(
             shape = CircleShape,
             containerColor = colorResource(id = R.color.black40),
             onClick = {
-                showDialog = false
                 navController.navigate(Screen.Add.route)
             },
             modifier = Modifier

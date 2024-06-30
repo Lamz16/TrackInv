@@ -45,11 +45,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.ContentAlpha
 import com.lamz.trackinv.R
 import com.lamz.trackinv.domain.model.BarangModel
 import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.model.partner.TransactionViewModel
+import com.lamz.trackinv.presentation.ui.component.AlertDialogMessage
 import com.lamz.trackinv.presentation.ui.component.CardLongItem
 import com.lamz.trackinv.presentation.ui.component.SearchBar
 import com.lamz.trackinv.presentation.ui.state.UiState
@@ -162,14 +164,11 @@ fun IncomingContent(
         ) {
             items(filteredProducts) { inventory ->
                 CardLongItem(
-                    modifier = Modifier.clickable {
+                    onClick = {
                         selectedBarang = inventory
                         showInputDialogIncoming = true
                     },
-                    namaItem = inventory.namaBarang ?: "",
-                    pieces = inventory.stokBarang ?: 0,
-                     hargaJual = inventory.sell ?: "",
-                    hargaBeli =  inventory.buy ?: "",
+                    inventory = inventory
                 )
             }
 
@@ -274,6 +273,20 @@ fun IncomingContent(
                     }
                 }
             )
+        }
+
+        val addTransactionState by viewModel.addTransactionState.collectAsStateWithLifecycle()
+
+        when(val data = addTransactionState){
+            is UiState.Error -> {
+                AlertDialogMessage(modifier = modifier, title = "Error", desc = data.errorMessage)
+            }
+            is UiState.Success -> {
+                viewModel.getAllInventory()
+                AlertDialogMessage(modifier = modifier, title = "Sukses",  desc = "Sukses menambahkan data transaksi baru")
+            }
+
+            else -> {}
         }
 
         SearchBar(

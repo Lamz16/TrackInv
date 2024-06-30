@@ -15,6 +15,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,31 +36,46 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun CardLongItem(
+fun CardLongInventory(
     inventory : BarangModel,
-    onClick : () -> Unit,
     modifier: Modifier = Modifier,
+    navigateToDetail: (String) -> Unit,
 ){
     val sell = inventory.sell?.toInt()
     val buy = inventory.buy?.toInt()
     val formattedPriceJual = NumberFormat.getNumberInstance(Locale("id", "ID")).format(sell)
     val formattedPriceBeli = NumberFormat.getNumberInstance(Locale("id", "ID")).format(buy)
+    var showDetail by remember { mutableStateOf(false) }
 
+    fun showPopupDetail() {
+        showDetail = true
+    }
+
+    fun closePopupDetail() {
+        showDetail = false
+    }
 
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
         .size(100.dp)
         .clip(RoundedCornerShape(10.dp))
-        .clickable { onClick() },
+        .clickable { showPopupDetail() },
         colors = CardDefaults.cardColors(
             containerColor = colorResource(id = R.color.lavender)
         )
 
-    ){Column (
+    ){
+        Column (
         modifier = modifier
     ) {
 
+        if (showDetail) {
+            InventoryDialog(
+                barang = inventory,
+                navigateToDetail =  navigateToDetail,
+                onDismissRequest = { closePopupDetail() })
+        }
 
         Row (
             modifier = modifier

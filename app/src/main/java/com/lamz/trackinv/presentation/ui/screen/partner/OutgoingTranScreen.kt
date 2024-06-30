@@ -161,14 +161,11 @@ fun OutGoingContent(
         ) {
             items(filteredProducts) { inventory ->
                 CardLongItem(
-                    modifier = Modifier.clickable {
+                   onClick = {
                         selectedBarang = inventory
                         showInputDialogOutgoing = true
                     },
-                    namaItem = inventory.namaBarang ?: "",
-                    pieces = inventory.stokBarang ?: 0,
-                    hargaJual = inventory.sell ?: "",
-                    hargaBeli =  inventory.buy ?: "",
+                    inventory = inventory
                 )
             }
 
