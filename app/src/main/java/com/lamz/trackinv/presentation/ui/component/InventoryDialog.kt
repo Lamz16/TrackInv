@@ -188,12 +188,15 @@ fun InventoryDialog(
             Row {
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
-                    onClick = { navigateToDetail(barang?.idBarang ?: "") },
+                    onClick = {
+                        onDismissRequest()
+                        navigateToDetail(barang?.idBarang ?: "")
+                    },
                     colors = ButtonDefaults.buttonColors(black40),
                     shape = RoundedCornerShape(4.dp),
                     modifier = modifier.size(72.dp, height = 36.dp)
                 ) {
-                    Text(text = "Edit", color = yellow , fontSize = 12.sp)
+                    Text(text = "Edit", color = yellow, fontSize = 12.sp)
                 }
             }
         }
