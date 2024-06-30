@@ -222,14 +222,7 @@ private fun ListUpdatedTrans(
             }
         } else {
             items(allTransactions) { transactions ->
-                CardItemTransactionsUpdate(
-                    nama = transactions.namaBarang ?: "",
-                    waktu = transactions.tglTran ?: "",
-                    harga = transactions.nominal ?: "",
-                    type = transactions.jenisTran ?: "",
-                    tipe = transactions.namaPartner ?: ""
-                )
-
+                CardItemTransactionsUpdate(transaksi = transactions)
             }
         }
     }

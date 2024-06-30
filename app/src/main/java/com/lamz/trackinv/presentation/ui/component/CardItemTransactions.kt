@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamz.trackinv.R
@@ -42,13 +41,8 @@ import java.util.Locale
 
 @Composable
 fun CardItemTransactions(
-    type: String,
-    nama: String,
-    harga: String,
-    tipe: String,
-    waktu: String,
-    transaksiModel: TransaksiModel? = null,
     modifier: Modifier = Modifier,
+    transaksi: TransaksiModel? = null,
 ) {
     var showDetail by remember { mutableStateOf(false) }
 
@@ -60,21 +54,21 @@ fun CardItemTransactions(
         showDetail = false
     }
 
-    val nominal = harga.toInt()
+    val nominal = transaksi?.nominal?.toInt()
     val formattedNominal = NumberFormat.getNumberInstance(Locale("id", "ID")).format(nominal)
-    val color = if (type.lowercase() == "masuk") {
+    val color = if (transaksi?.jenisTran?.lowercase() == "masuk") {
         Color.Red
     }else{
         green
     }
-    val jenisTrans = if (type.lowercase() == "masuk") {
+    val jenisTrans = if (transaksi?.jenisTran?.lowercase() == "masuk") {
         stringResource(id = R.string.tran_masuk, formattedNominal)
     }else{
         stringResource(id = R.string.tran_keluar, formattedNominal)
     }
 
     if (showDetail){
-        transaksiModel?.let {
+        transaksi?.let {
             TransactionsDialog(
                 transactions = it,
                 onDismissRequest = { closePopupDetail() })
@@ -110,7 +104,7 @@ fun CardItemTransactions(
                         .size(24.dp)
                 )
                 Text(
-                    text = type,
+                    text = transaksi?.jenisTran.toString(),
                     fontSize = 15.sp,
                     fontStyle = FontStyle.Normal,
                     fontWeight = FontWeight.Bold,
@@ -141,19 +135,19 @@ fun CardItemTransactions(
                     .padding(start = 20.dp, end = 25.dp, top = 10.dp)
             ) {
                 Text(
-                    text = nama,
+                    text = transaksi?.namaBarang ?: "",
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
                     modifier = modifier.weight(1f)
                 )
                 Text(
-                    text = tipe,
+                    text = transaksi?.namaPartner ?: "",
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = modifier.weight(1f)
                 )
                 Text(
-                    text = waktu,
+                    text = transaksi?.tglTran ?: "",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = modifier.weight(1f)
@@ -162,11 +156,5 @@ fun CardItemTransactions(
         }
 
     }
-}
-
-@Preview
-@Composable
-private fun Preview() {
-    CardItemTransactions(type = "Masuk", nama = "Beras", harga = "20000", tipe = "ALex", waktu = "20-07-2024"  )
 }
 

@@ -2,7 +2,6 @@ package com.lamz.trackinv.presentation.ui.screen.transactions
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,7 +40,6 @@ import com.lamz.trackinv.domain.model.TransaksiModel
 import com.lamz.trackinv.presentation.model.transactions.TransactionViewModel
 import com.lamz.trackinv.presentation.ui.component.CardItemTransactions
 import com.lamz.trackinv.presentation.ui.component.SearchBar
-import com.lamz.trackinv.presentation.ui.component.TransactionsDialog
 import com.lamz.trackinv.presentation.ui.state.UiState
 import kotlinx.coroutines.delay
 
@@ -138,12 +136,7 @@ fun TransactionsContent(
                 items(filteredTransactions) { transactions ->
                     Log.d("Data Transaksi", "TransactionsContent: $transactions")
                     CardItemTransactions(
-                        nama = transactions.namaBarang ?: "",
-                        waktu = transactions.tglTran ?: "",
-                        harga = transactions.nominal ?: "",
-                        type = transactions.jenisTran ?: "",
-                        tipe = transactions.namaPartner ?: "",
-                       transaksiModel = transactions
+                        transaksi = transactions
                     )
 
                 }
