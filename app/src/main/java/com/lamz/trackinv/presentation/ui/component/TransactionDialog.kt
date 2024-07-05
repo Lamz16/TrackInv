@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,8 +75,10 @@ fun TransactionsDialog(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier.padding(
-                    horizontal = 16.dp,
+                modifier
+                    .fillMaxWidth()
+                    .padding(
+                    horizontal = 8.dp,
                 )
             ) {
                Column {
@@ -169,7 +172,7 @@ fun TransactionsDialog(
                             .padding(end = 10.dp)
                     )
                 }
-                Column {
+                Column{
                     Text(
                         text = transactions.jenisTran ?: "",
                         fontSize = 12.sp,
@@ -191,6 +194,7 @@ fun TransactionsDialog(
                         modifier = modifier
                             .padding(end = 10.dp)
                     )
+
                     Text(
                         text = transactions.jumlah ?: "",
                         fontSize = 12.sp,
